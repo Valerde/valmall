@@ -3,6 +3,9 @@ package com.sovava.product;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  *  整合mybatis-plus
@@ -16,6 +19,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *          使用@MapperScan("com.sovava.product.dao")
  */
 @SpringBootApplication
+@EnableDiscoveryClient
+@EnableFeignClients
 public class GulimallProductApplication {
 
     public static void main(String[] args) {
