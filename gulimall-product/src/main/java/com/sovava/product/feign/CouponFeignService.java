@@ -19,7 +19,7 @@ public interface CouponFeignService {
      *      3）、对方服务收到请求。请求体里有json数据。
      *          (@RequestBody SpuBoundsEntity spuBounds)；将请求体的json转为SpuBoundsEntity；
      * 只要json数据模型是兼容的。双方服务无需使用同一个to
-     * @param spuBoundTo
+     * @param
      * @return
      */
 //    @PostMapping("/coupon/spubounds/save")

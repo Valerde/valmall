@@ -15,8 +15,13 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto # 设置自增主键
+      logic-delete-value: 1 # 配置
+      logic-not-delete-value: 0
 server:
   port: 8081
 test:
   prod:
     user: ykn
+logging:
+  level:
+    com.sovava: debug

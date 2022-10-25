@@ -17,6 +17,13 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  *          在application.yml 中配置数据源相关配置
  *      配置mybatis-plus
  *          使用@MapperScan("com.sovava.product.dao")
+ *          告诉mybatisplus sql文件的位置
+ *
+ * -----------
+ * 逻辑删除
+ * 1. 配置全局的逻辑删除规则
+ * 2. 配置逻辑删除的组件Bean(mybatisplus3以上的不需要
+ * 3. 给bean加上逻辑删除的注解@TableLogic
  */
 @SpringBootApplication
 @EnableDiscoveryClient
