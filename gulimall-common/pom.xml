@@ -25,6 +25,14 @@
             <version>3.5.2</version>
         </dependency>
 
+        <!--集成校验规则-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <version>2.3.7.RELEASE</version>
+            <!--            根据自己的版本引入-->
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -66,6 +74,8 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
+
+
     </dependencies>
 
     <dependencyManagement>

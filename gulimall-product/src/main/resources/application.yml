@@ -25,3 +25,9 @@ test:
 logging:
   level:
     com.sovava: debug
+alibaba:
+  cloud:
+    access-key: LTAI5tD1ZuGF1Q6ffTWuDBUb
+    secret-key: sPpxdRR1DrncleDOldk7sXwgSNooHL
+    oss:
+      endpoint: oss-cn-guangzhou.aliyuncs.com

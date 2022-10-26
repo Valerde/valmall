@@ -1,5 +1,6 @@
 package com.sovava.product;
 
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.product.entity.BrandEntity;
 import com.sovava.product.service.BrandService;
@@ -7,6 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.annotation.Resource;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 @SpringBootTest
@@ -23,7 +29,7 @@ class GulimallProductApplicationTests {
         brand.setName("dauabi");
         brand.setLogo("adfgd");
 //        for (int i = 0; i < 10; i++)
-            brandService.save(brand);
+        brandService.save(brand);
         System.out.println("保存成功");
     }
 
@@ -48,4 +54,5 @@ class GulimallProductApplicationTests {
 
 
     }
+
 }

@@ -68,10 +68,10 @@ public class CategoryController {
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @RequestMapping("/update/sort")
     //@RequiresPermissions("product:category:update")
-    public R update(@RequestBody CategoryEntity category){
-		categoryService.updateById(category);
+    public R update(@RequestBody CategoryEntity[] category){
+		categoryService.updateBatchById(Arrays.asList(category));
 
         return R.ok();
     }
