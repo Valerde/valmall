@@ -34,12 +34,26 @@ import javax.validation.constraints.NotNull;
  * 2. 为方法请求参数添加注解@Valid
  *      效果： 校验错误后会有默认的响应
  * 3. 给校验的请求参数后面紧跟一个BindingResult， 就可以获得校验的结果
+ * 4. 分组校验功能
+ *        @NotBlank(message = "品牌名必须提交", groups = {AddGroup.class, UpdateGroup.class})
+ *        给校验注解标注什么分组下进行校验
  *
- *
- *
+ *        在请求参数中更换Valid 为Validated , 并指定分组
+ *        默认不分组的校验规则 groups = {}， 只有在请求字段不进行分组校验（@Valid)的情况下在会生效
+ * 5. 自定义的校验规则 ：
+ *      编写一个自定义的校验注解
+ *      编写一个自定义的校验器
+ *      关联自定义的校验器和校验注解
+ *           \@Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})//可以在哪里使用
+ *          \@Retention(RUNTIME)
+ *           \@Documented
+ *           \@Constraint(validatedBy = {ListValueConstraintValidator.class [可以指定多个校验器] })
+ *          public @interface ListValue {
  *
  * 统一的异常处理
  * \@ControllerAdvice
+ * 编写异常处理类 ， 使用ControllerAdvice注解
+ * 使用ExceptionHandle标注可以处理的类型
  *
  */
 @SpringBootApplication
