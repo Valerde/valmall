@@ -1,9 +1,12 @@
 package com.sovava.product.service.impl;
 
+import com.sovava.product.service.CategoryBrandRelationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,13 +21,20 @@ import com.sovava.common.utils.Query;
 import com.sovava.product.dao.CategoryDao;
 import com.sovava.product.entity.CategoryEntity;
 import com.sovava.product.service.CategoryService;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 
 @Service("categoryService")
+@Slf4j
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
 
     //    @Autowired
 //    private CategoryDao categoryDao;
+
+    @Resource
+    private CategoryBrandRelationService categoryBrandRelationService;
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryEntity> page = this.page(
@@ -62,6 +72,28 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
         //逻辑删除
         baseMapper.deleteBatchIds(ids);
+    }
+
+    @Override
+    public Long[] findCatelogPath(Long catelogId) {
+        List<Long> path = new ArrayList<>();
+
+        CategoryEntity categoryEntity = baseMapper.selectById(catelogId);
+        Long secondPath = categoryEntity.getParentCid();
+        CategoryEntity categoryEntity1 = baseMapper.selectById(secondPath);
+        Long firstPath = categoryEntity1.getParentCid();
+        path.add(firstPath);
+        path.add(secondPath);
+        path.add(catelogId);
+        log.debug("查询的路径为{}",path.toString());
+        return path.toArray(new Long[0]);
+    }
+
+    @Override
+    @Transactional
+    public void updateCascat(CategoryEntity category) {
+        this.updateById(category);
+        categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
     }
 
     private List<CategoryEntity> getChildren(CategoryEntity entity, List<CategoryEntity> all) {

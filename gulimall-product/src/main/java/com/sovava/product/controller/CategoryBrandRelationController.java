@@ -1,15 +1,13 @@
 package com.sovava.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.sovava.product.entity.CategoryBrandRelationEntity;
 import com.sovava.product.service.CategoryBrandRelationService;
@@ -31,6 +29,21 @@ public class CategoryBrandRelationController {
     @Autowired
     private CategoryBrandRelationService categoryBrandRelationService;
 
+    /**
+     * 获取当前品牌关联的所有分类列表
+     * @param brandId
+     * @return
+     */
+//    @RequestMapping("/catelog/list")
+    @GetMapping("/catelog/list")
+    //@RequiresPermissions("product:categorybrandrelation:list")
+    public R catelogList(@RequestParam Long brandId){
+        LambdaQueryWrapper<CategoryBrandRelationEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(CategoryBrandRelationEntity::getBrandId,brandId);
+        List<CategoryBrandRelationEntity> categoryBrandRelationEntities = categoryBrandRelationService.list(lqw);
+
+        return R.ok().put("data",categoryBrandRelationEntities);
+    }
     /**
      * 列表
      */
@@ -60,7 +73,13 @@ public class CategoryBrandRelationController {
     @RequestMapping("/save")
     //@RequiresPermissions("product:categorybrandrelation:save")
     public R save(@RequestBody CategoryBrandRelationEntity categoryBrandRelation){
-		categoryBrandRelationService.save(categoryBrandRelation);
+        //由于传入字段仅有分类id  catelogId和品牌id  brandId   {"brandId":1,"catelogId":2}
+        //而数据库中有分类名和品牌名
+//        故而需要先查询出名字
+
+
+
+		categoryBrandRelationService.saveDetail(categoryBrandRelation);
 
         return R.ok();
     }
