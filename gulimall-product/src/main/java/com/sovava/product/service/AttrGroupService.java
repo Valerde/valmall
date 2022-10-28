@@ -3,6 +3,7 @@ package com.sovava.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sovava.common.utils.PageUtils;
 import com.sovava.product.entity.AttrGroupEntity;
+import com.sovava.product.vo.AttrGroupRelationVO;
 
 import java.util.Map;
 
@@ -18,5 +19,11 @@ public interface AttrGroupService extends IService<AttrGroupEntity> {
     PageUtils queryPage(Map<String, Object> params);
 
     PageUtils queryPage(Map<String, Object> params, Long catelogId);
+
+    /**
+     * 删除attr和attrgroup的关联关系
+     * @param attrGroupRelationVOs
+     */
+    void deleteRelation(AttrGroupRelationVO[] attrGroupRelationVOs);
 }
 

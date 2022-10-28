@@ -3,13 +3,21 @@
 
 <mapper namespace="com.sovava.product.dao.AttrAttrgroupRelationDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.sovava.product.entity.AttrAttrgroupRelationEntity" id="attrAttrgroupRelationMap">
         <result property="id" column="id"/>
         <result property="attrId" column="attr_id"/>
         <result property="attrGroupId" column="attr_group_id"/>
         <result property="attrSort" column="attr_sort"/>
     </resultMap>
+    <delete id="deleteBatchRelation">
+        delete from `pms_attr_attrgroup_relation`
+        <where>
+            <foreach collection="entities" item="item" separator=" OR " >
+                (attr_id = #{item.attrId} and attr_group_id = #{item.attrGroupId})
+            </foreach>
+        </where>
+    </delete>
 
 
 </mapper>
