@@ -1,5 +1,7 @@
 package com.sovava.product.feign;
 
+import com.sovava.common.to.SkuReductionTo;
+import com.sovava.common.to.SpuBoundTo;
 import com.sovava.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,12 +24,12 @@ public interface CouponFeignService {
      * @param
      * @return
      */
-//    @PostMapping("/coupon/spubounds/save")
-//    R saveSpuBounds(@RequestBody SpuBoundTo spuBoundTo);
+    @PostMapping("/coupon/spubounds/save")
+    R saveSpuBounds(@RequestBody SpuBoundTo spuBoundTo);
 //
 //
-//    @PostMapping("/coupon/skufullreduction/saveinfo")
-//    R saveSkuReduction(@RequestBody SkuReductionTo skuReductionTo);
+    @PostMapping("/coupon/skufullreduction/saveinfo")
+    R saveSkuReduction(@RequestBody SkuReductionTo skuReductionTo);
 
     @RequestMapping("/coupon/coupon/list")
     public R list(@RequestParam Map<String, Object> params);

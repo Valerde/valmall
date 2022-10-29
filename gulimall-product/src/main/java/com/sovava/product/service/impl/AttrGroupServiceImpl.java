@@ -3,7 +3,10 @@ package com.sovava.product.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.product.dao.AttrAttrgroupRelationDao;
 import com.sovava.product.entity.AttrAttrgroupRelationEntity;
+import com.sovava.product.entity.AttrEntity;
+import com.sovava.product.service.AttrService;
 import com.sovava.product.vo.AttrGroupRelationVO;
+import com.sovava.product.vo.AttrGroupWithAttrsVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,9 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
 
     @Resource
     private AttrAttrgroupRelationDao relationDao;
+
+    @Resource
+    private AttrService attrService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -79,11 +85,33 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
 
         List<AttrAttrgroupRelationEntity> entities = Arrays.asList(attrGroupRelationVOs).stream().map((item) -> {
             AttrAttrgroupRelationEntity relation = new AttrAttrgroupRelationEntity();
-            BeanUtils.copyProperties(item,relation);
+            BeanUtils.copyProperties(item, relation);
             return relation;
         }).collect(Collectors.toList());
 
         relationDao.deleteBatchRelation(entities);
+
+    }
+
+    @Override
+    public List<AttrGroupWithAttrsVo> getAttrGroupWithAttrByCatlog(Long catelogId) {
+
+        //1. 查询分组信息
+        LambdaQueryWrapper<AttrGroupEntity> lqw1 = new LambdaQueryWrapper<>();
+        lqw1.eq(AttrGroupEntity::getCatelogId, catelogId);
+        List<AttrGroupEntity> attrGroupEntities = this.list(lqw1);
+
+        //查询所有属性
+        List<AttrGroupWithAttrsVo> attrGroupWithAttrsVos = attrGroupEntities.stream().map((item) -> {
+            AttrGroupWithAttrsVo vo = new AttrGroupWithAttrsVo();
+            BeanUtils.copyProperties(item, vo);
+            List<AttrEntity> relationAttr = attrService.getRelationAttr(item.getAttrGroupId());
+            if (relationAttr != null)
+                vo.setAttrs(relationAttr);
+            return vo;
+        }).collect(Collectors.toList());
+
+        return attrGroupWithAttrsVos;
 
     }
 

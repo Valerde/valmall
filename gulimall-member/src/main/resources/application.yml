@@ -4,10 +4,20 @@ spring:
     username: root
     password: ykn12345
     url: jdbc:mysql://192.168.37.129:3306/gulimall_ums
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.37.129:8848
+  application:
+    name: gulimall-member
 mybatis-plus:
   global-config:
     db-config:
       id-type: auto
   mapper-locations: classpath*:/mapper/**/*.xml
-
+server:
+  port: 8082
+logging:
+  level:
+    com.sovava: debug
 

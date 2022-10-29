@@ -8,7 +8,11 @@ import com.sovava.product.service.BrandService;
 import com.sovava.product.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -65,6 +69,17 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
     @Override
     public void updateCategory(Long catId, String name) {
         this.baseMapper.updateCagory(catId,name);
+    }
+
+    @Override
+    public List<BrandEntity> getBrandsByCatId(Long catId) {
+        LambdaQueryWrapper<CategoryBrandRelationEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(CategoryBrandRelationEntity::getCatelogId,catId);
+        List<CategoryBrandRelationEntity> relationList = this.baseMapper.selectList(lqw);
+        List<Long> brandList = relationList.stream().map(CategoryBrandRelationEntity::getBrandId).collect(Collectors.toList());
+
+        List<BrandEntity> brandEntities = brandDao.selectBatchIds(brandList);
+        return brandEntities;
     }
 
 }

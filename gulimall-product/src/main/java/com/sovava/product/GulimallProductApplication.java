@@ -58,7 +58,7 @@ import javax.validation.constraints.NotNull;
  */
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients
+@EnableFeignClients(basePackages = "com.sovava.product.feign")
 public class GulimallProductApplication {
 
 //    @NotNull

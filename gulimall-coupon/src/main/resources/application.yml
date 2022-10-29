@@ -8,8 +8,15 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.37.129:8848
+  application:
+    name: gulimall-coupon
 mybatis-plus:
   global-config:
     db-config:
       id-type: auto
   mapper-locations: classpath*:/mapper/**/*.xml
+server:
+  port: 8083
+logging:
+  level:
+    com.sovava: debug

@@ -15,8 +15,9 @@ import lombok.Data;
  * @email 602533622@qq.com
  * @date 2022-10-22 18:24:16
  */
-@Data
+
 @TableName("sms_sku_ladder")
+@Data
 public class SkuLadderEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 

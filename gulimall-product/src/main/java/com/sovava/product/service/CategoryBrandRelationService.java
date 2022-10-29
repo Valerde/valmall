@@ -2,8 +2,10 @@ package com.sovava.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sovava.common.utils.PageUtils;
+import com.sovava.product.entity.BrandEntity;
 import com.sovava.product.entity.CategoryBrandRelationEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,5 +33,7 @@ public interface CategoryBrandRelationService extends IService<CategoryBrandRela
      * @param name
      */
     void updateCategory(Long catId, String name);
+
+    List<BrandEntity> getBrandsByCatId(Long catId);
 }
 
