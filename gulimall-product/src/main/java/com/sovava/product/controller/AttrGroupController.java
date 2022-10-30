@@ -47,7 +47,7 @@ public class AttrGroupController {
     private AttrAttrgroupRelationService attrAttrgroupRelationService;
 
     ///product/attrgroup/{catelogId}/withattr
-    @GetMapping("{catelogId}/withattr")
+    @GetMapping("/{catelogId}/withattr")
     public R getAttrGroupWithAttr(@PathVariable("catelogId") Long catelogId) {
 
         //1. 查处当前分类下的所有属性分组

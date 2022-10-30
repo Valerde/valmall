@@ -1,5 +1,6 @@
 package com.sovava.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.common.to.SkuReductionTo;
 import com.sovava.common.to.SpuBoundTo;
 import com.sovava.common.utils.R;
@@ -174,7 +175,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 SkuReductionTo skuReductionTo = new SkuReductionTo();
                 BeanUtils.copyProperties(item, skuReductionTo);
                 skuReductionTo.setSkuId(skuId);
-                if (skuReductionTo.getDiscount().compareTo(new BigDecimal(0)) == 1 || skuReductionTo.getFullCount() > 0){
+                if (skuReductionTo.getDiscount().compareTo(new BigDecimal(0)) == 1 || skuReductionTo.getFullCount() > 0) {
                     R r1 = couponFeignService.saveSkuReduction(skuReductionTo);
                     if (r1.getCode() != 0) {
                         log.error("远程保存优惠信息失败");
@@ -184,6 +185,35 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             });
         }
 
+
+    }
+
+    @Override
+    public PageUtils queryPageByCondition(Map<String, Object> params) {
+        LambdaQueryWrapper<SpuInfoEntity> lqw = new LambdaQueryWrapper<>();
+        String key = (String) params.get("key");
+        if (!StringUtils.isEmpty(key)) {
+            lqw.and((w) -> {//如果不用这里的and，那么sql语句拼来以后就会是：status=1 and id=? or spu_name=？
+                //          而加上and后 ， 就变成了status=1 and （id=? or spu_name=？）
+                w.eq(SpuInfoEntity::getId, key).or().like(SpuInfoEntity::getSpuName, key);
+            });
+        }
+        String status = (String) params.get("status");
+        if (!StringUtils.isEmpty(status)) {
+            lqw.eq(SpuInfoEntity::getPublishStatus, status);
+        }
+        String brandId = (String) params.get("brandId");
+        if (!StringUtils.isEmpty(brandId)&&!brandId.equalsIgnoreCase("0")) {
+            lqw.eq(SpuInfoEntity::getBrandId, brandId);
+        }
+
+        String catelogId = (String) params.get("catelog");
+        if (!StringUtils.isEmpty(catelogId)) {
+            lqw.eq(SpuInfoEntity::getCatalogId, catelogId);
+        }
+        IPage<SpuInfoEntity> page = this.page(new Query<SpuInfoEntity>().getPage(params), lqw);
+
+        return new PageUtils(page);
 
     }
 

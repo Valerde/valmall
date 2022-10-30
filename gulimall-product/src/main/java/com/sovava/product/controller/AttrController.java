@@ -1,9 +1,12 @@
 package com.sovava.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.sovava.product.entity.ProductAttrValueEntity;
+import com.sovava.product.service.ProductAttrValueService;
 import com.sovava.product.vo.AttrRespVO;
 import com.sovava.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import com.sovava.product.service.AttrService;
 import com.sovava.common.utils.PageUtils;
 import com.sovava.common.utils.R;
+
+import javax.annotation.Resource;
 
 
 /**
@@ -27,9 +32,20 @@ public class AttrController {
     @Autowired
     private AttrService attrService;
 
+    @Resource
+    private ProductAttrValueService productAttrValueService;
+
+
+    ///product/attr/base/listforspu/{spuId}
+    @GetMapping("/base/listforspu/{spuId}")
+    public R getSpuListById(@PathVariable("spuId") Long spuId) {
+        List<ProductAttrValueEntity> list = productAttrValueService.baseListforspuSpuId(spuId);
+        return R.ok().put("data", list);
+    }
+
     @GetMapping("/{type}/list/{catelogId}")
-    public R attrBaseList(@RequestParam Map<String, Object> params,@PathVariable("type") String type, @PathVariable("catelogId") Long catelogId) {
-        PageUtils page = attrService.queryBaseAttrPage(params, catelogId,type);
+    public R attrBaseList(@RequestParam Map<String, Object> params, @PathVariable("type") String type, @PathVariable("catelogId") Long catelogId) {
+        PageUtils page = attrService.queryBaseAttrPage(params, catelogId, type);
         return R.ok().put("page", page);
     }
 
@@ -78,6 +94,16 @@ public class AttrController {
 
         return R.ok();
     }
+
+    @PostMapping("/update/{spuId}")
+    //@RequiresPermissions("product:attr:update")
+    public R updateSpuAttr(@PathVariable("spuId") Long spuId
+            , @RequestBody List<ProductAttrValueEntity> list) {
+        productAttrValueService.updateSpuAttr(spuId,list);
+
+        return R.ok();
+    }
+
 
     /**
      * 删除

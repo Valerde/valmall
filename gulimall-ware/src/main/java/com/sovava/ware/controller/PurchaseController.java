@@ -1,15 +1,16 @@
 package com.sovava.ware.controller;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.sovava.ware.vo.MergeVo;
+import com.sovava.ware.vo.PurchaseDoneVo;
+import com.sovava.ware.vo.PurchaseItemDoneVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.sovava.ware.entity.PurchaseEntity;
 import com.sovava.ware.service.PurchaseService;
@@ -30,6 +31,40 @@ import com.sovava.common.utils.R;
 public class PurchaseController {
     @Autowired
     private PurchaseService purchaseService;
+
+    @PostMapping("/done")
+    public R finish(@RequestBody PurchaseDoneVo doneVo){
+        purchaseService.done(doneVo);
+        return R.ok();
+    }
+
+
+    /**
+     * 领取采购单
+     * @param ids
+     * @return
+     */
+    @PostMapping("/received")
+    public R receivedPurchase(@RequestBody List<Long> ids){
+        purchaseService.received(ids);
+        return R.ok();
+    }
+
+
+//    purchaseId: 1, //整单id
+//    items:[1,2,3,4] //合并项集合
+    @PostMapping("/merge")
+    public R mergePurchase(@RequestBody MergeVo vo){
+        purchaseService.mergePurchase(vo);
+        return R.ok();
+    }
+
+    @RequestMapping("/unreceive/list")
+    public R listUnReceive(@RequestParam Map<String, Object> params){
+        PageUtils page = purchaseService.queryPageUnReceiveList(params);
+
+        return R.ok().put("page", page);
+    }
 
     /**
      * 列表
@@ -60,6 +95,9 @@ public class PurchaseController {
     @RequestMapping("/save")
     //@RequiresPermissions("ware:purchase:save")
     public R save(@RequestBody PurchaseEntity purchase){
+
+        purchase.setCreateTime(new Date());
+        purchase.setUpdateTime(new Date());
 		purchaseService.save(purchase);
 
         return R.ok();
@@ -71,6 +109,7 @@ public class PurchaseController {
     @RequestMapping("/update")
     //@RequiresPermissions("ware:purchase:update")
     public R update(@RequestBody PurchaseEntity purchase){
+        purchase.setUpdateTime(new Date());
 		purchaseService.updateById(purchase);
 
         return R.ok();
