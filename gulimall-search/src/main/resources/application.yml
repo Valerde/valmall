@@ -1,0 +1,26 @@
+spring:
+#  datasource:
+#    username: root
+#    password: ykn12345
+#    url: jdbc:mysql://192.168.37.129:3306/gulimall_pms
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.37.129:8848
+  application:
+    name: gulimall-search
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+#mybatis-plus:
+#  mapper-locations: classpath*:/mapper/**/*.xml
+#  global-config:
+#    db-config:
+#      id-type: auto # 设置自增主键
+#      logic-delete-value: 1 # 配置
+#      logic-not-delete-value: 0
+server:
+  port: 8085
+logging:
+  level:
+    com.sovava: debug
