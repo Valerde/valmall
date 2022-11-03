@@ -1,8 +1,10 @@
 package com.sovava.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 
 @Service("skuInfoService")
+@Slf4j
 public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> implements SkuInfoService {
 
     @Override
@@ -69,6 +72,17 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
         IPage<SkuInfoEntity> page = this.page(new Query<SkuInfoEntity>().getPage(params), lqw);
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public List<SkuInfoEntity> selectSkuBySpuId(Long spuId) {
+
+        log.debug("传入的spuId为:{}", spuId);
+        LambdaQueryWrapper<SkuInfoEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SkuInfoEntity::getSpuId, spuId);
+        List<SkuInfoEntity> skus = this.list(lqw);
+        log.debug("返回的skus信息为{}", skus.toString());
+        return skus;
     }
 
 }

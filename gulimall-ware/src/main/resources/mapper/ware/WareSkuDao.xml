@@ -19,6 +19,11 @@
           and ware_id = #{wareId};
 
     </update>
+    <select id="getSkuIdStock" resultType="java.lang.Long">
+        select sum(stock - stock_locked) as stockNum
+        from `wms_ware_sku`
+        where sku_id = #{item};
+    </select>
 
 
 </mapper>

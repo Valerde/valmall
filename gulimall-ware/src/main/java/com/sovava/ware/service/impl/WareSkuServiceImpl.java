@@ -3,10 +3,12 @@ package com.sovava.ware.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.common.utils.R;
 import com.sovava.ware.feign.ProductFeignService;
+import com.sovava.ware.vo.SkuHasStockVo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -100,6 +102,24 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             this.baseMapper.addStock(skuId, wareId, skuNum);
         }
 
+    }
+
+    @Override
+    public List<SkuHasStockVo> getSkusHasStockBySkuIds(List<Long> skuIds) {
+        List<SkuHasStockVo> skuHasStockVos = skuIds.stream().map((item) -> {
+            SkuHasStockVo vo = new SkuHasStockVo();
+            //查询当前sku总库存量
+            Long stockNum = this.baseMapper.getSkuIdStock(item);
+            if (stockNum == null) {
+                stockNum = 0L;
+            }
+            vo.setSkuId(item);
+            vo.setHasStock(stockNum > 0);
+            return vo;
+
+        }).collect(Collectors.toList());
+
+        return skuHasStockVos;
     }
 
 }
