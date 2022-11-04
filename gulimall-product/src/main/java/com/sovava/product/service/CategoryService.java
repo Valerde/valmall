@@ -3,6 +3,7 @@ package com.sovava.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sovava.common.utils.PageUtils;
 import com.sovava.product.entity.CategoryEntity;
+import com.sovava.product.vo.Catelog2Vo;
 
 import java.util.List;
 import java.util.Map;
@@ -37,5 +38,10 @@ public interface CategoryService extends IService<CategoryEntity> {
      * @param category
      */
     void updateCascat(CategoryEntity category);
+
+    List<CategoryEntity> findLevel1Categories();
+
+    Map<String, List<Catelog2Vo>> getCatalogJSON();
+
 }
 

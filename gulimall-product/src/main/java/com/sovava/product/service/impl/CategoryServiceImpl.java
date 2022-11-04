@@ -1,6 +1,8 @@
 package com.sovava.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.product.service.CategoryBrandRelationService;
+import com.sovava.product.vo.Catelog2Vo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,11 +32,10 @@ import javax.annotation.Resource;
 @Slf4j
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
 
-    //    @Autowired
-//    private CategoryDao categoryDao;
 
     @Resource
     private CategoryBrandRelationService categoryBrandRelationService;
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryEntity> page = this.page(
@@ -85,7 +86,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         path.add(firstPath);
         path.add(secondPath);
         path.add(catelogId);
-        log.debug("查询的路径为{}",path.toString());
+        log.debug("查询的路径为{}", path.toString());
         return path.toArray(new Long[0]);
     }
 
@@ -93,7 +94,51 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     @Transactional
     public void updateCascat(CategoryEntity category) {
         this.updateById(category);
-        categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
+        categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
+    }
+
+    @Override
+    public List<CategoryEntity> findLevel1Categories() {
+        LambdaQueryWrapper<CategoryEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(CategoryEntity::getParentCid, 0);
+        List<CategoryEntity> categoryEntities = this.list(lqw);
+        return categoryEntities;
+
+    }
+
+    @Override
+    public Map<String, List<Catelog2Vo>> getCatalogJSON() {
+        //查出所有一级分类
+        List<CategoryEntity> level1Categories = this.findLevel1Categories();
+        //封装数据
+        Map<String, List<Catelog2Vo>> parant_cid = level1Categories.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
+            //每一个的一级分类 ， 查到这个以及分类的二级分类
+            LambdaQueryWrapper<CategoryEntity> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(CategoryEntity::getParentCid, v.getCatId());
+            //当前一级id的二级分类
+            List<CategoryEntity> categoryEntities = this.baseMapper.selectList(lqw);
+
+            List<Catelog2Vo> catelog2Vos = null;
+            if (categoryEntities != null) {
+                catelog2Vos = categoryEntities.stream().map(l2 -> {
+
+                    Catelog2Vo catelog2Vo = new Catelog2Vo(v.getCatId().toString(), null, l2.getCatId().toString(), l2.getName());
+                    //赵二级分类的三级分类
+                    List<CategoryEntity> level3Cates = this.baseMapper.selectList(new LambdaQueryWrapper<CategoryEntity>().eq(CategoryEntity::getParentCid, l2.getCatId()));
+                    if (level3Cates != null) {
+                        List<Catelog2Vo.Catalog3Vo> catalog3Vos = level3Cates.stream().map(l3 -> {
+                            Catelog2Vo.Catalog3Vo catalog3Vo = new Catelog2Vo.Catalog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName());
+                            return catalog3Vo;
+                        }).collect(Collectors.toList());
+                        catelog2Vo.setCatalog3List(catalog3Vos);
+                    }
+                    return catelog2Vo;
+                }).collect(Collectors.toList());
+            }
+            return catelog2Vos;
+        }));
+
+        return parant_cid;
     }
 
     private List<CategoryEntity> getChildren(CategoryEntity entity, List<CategoryEntity> all) {

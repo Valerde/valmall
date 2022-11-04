@@ -55,6 +55,17 @@ import javax.validation.constraints.NotNull;
  * 编写异常处理类 ， 使用ControllerAdvice注解
  * 使用ExceptionHandle标注可以处理的类型
  *
+ *
+ *
+ *
+ *
+ * thymeleaf模板引擎
+ * 配置cache为false
+ * 静态资源都放在static下就能访问
+ * 页面放在templates下 ， 直接访问 ， springboot在启动的时候默认寻找index.html
+ * 页面更新不重启服务器 ，
+ *  1. 引入devtools
+ *  2. 修改完页面代码 ， ctrl+shift+F9 重新编译此页面，（如果是代码/配置 ， 还是重启服务）
  */
 @SpringBootApplication
 @EnableDiscoveryClient
