@@ -13,7 +13,10 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   thymeleaf:
-    cache: false
+    cache: true
+  redis:
+    host: 192.168.37.129
+    port: 6379
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   global-config:
@@ -28,4 +31,4 @@ test:
     user: ykn
 logging:
   level:
-    com.sovava: debug
+    com.sovava: error

@@ -116,4 +116,8 @@ public class AttrController {
         return R.ok();
     }
 
+    @GetMapping("/hello")
+    public String simpleServer(){
+        return "hello guy";
+    }
 }
