@@ -4,6 +4,7 @@ package com.sovava.product;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -66,6 +67,38 @@ import javax.validation.constraints.NotNull;
  * 页面更新不重启服务器 ，
  *  1. 引入devtools
  *  2. 修改完页面代码 ， ctrl+shift+F9 重新编译此页面，（如果是代码/配置 ， 还是重启服务）
+ *
+ *
+ *  整合redisson作为分布式锁等功能框架
+ *  1. 导入依赖
+ *  2. 配置redisson
+ *  3. 使用
+ *
+ *
+ *  整合springCache简化缓存开发
+ *  1. 引入依赖 spring-boot-starter-cache
+ *  2. 写配置 自动配置 CacheAutoConfiguration会导入RedisCacheConfiguration
+ *  /@Cacheable 触发将数据保存到缓存的功能
+ *  /@CacheEvict 触发将数据中缓存中删除
+ *  /@CachePut 不影响方法执行更新缓存
+ *  /@Caching 组合以上多个操作
+ *  /@CacheConfig 在类级别共享缓存的相关配置
+ *
+ *  1. 开启缓存功能spring.cache.type=redis    在启动类上@EnableCaching
+ *  2. 只需要使用注解完成缓存操作
+ *  //默认行为：
+ *      如果缓存中有，那么方法不执行
+ *      key是自动生成的,缓存的名字：SimpleKey:[]自动生成的
+ *      缓存的value的值 ，默认使用java序列化机制，将序列化后的数据存到缓存
+ *      默认ttl时间：-1，默认不过期
+ *  //自定义
+ *      自定义缓存的key，
+ *      设置ttl 配置文件中指定ttl
+ *      将数据保存为json:
+ *          CacheAutoConfiguration ->RedisCacheConfiguration->自动配置了RedisCacheManager
+ *          ->初始化所有缓存->每个缓存决定使用什么配置->想改缓存的配置，质素要在容器中放一个RedisCacheConfiguration即可
+ *          ->就会应用到当前RedisCacheManager缓存管理的所有分区中
+ *
  */
 @SpringBootApplication
 @EnableDiscoveryClient

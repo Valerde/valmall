@@ -13,10 +13,16 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   thymeleaf:
-    cache: true
+    cache: false
   redis:
     host: 192.168.37.129
-    port: 6379
+    port: 6379 # 配置使用redis作为缓存
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  #毫秒
+      cache-null-values: true #防止缓存穿透
+#      key-prefix: CACHE_  #key的前缀
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   global-config:
@@ -31,4 +37,4 @@ test:
     user: ykn
 logging:
   level:
-    com.sovava: error
+    com.sovava: debug

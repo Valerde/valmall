@@ -6,7 +6,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.product.service.CategoryBrandRelationService;
 import com.sovava.product.vo.Catelog2Vo;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -41,6 +46,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Resource
     private CategoryBrandRelationService categoryBrandRelationService;
+
+    @Resource
+    private RedissonClient redisson;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -96,20 +104,36 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return path.toArray(new Long[0]);
     }
 
+    /**
+     * 级联更新所有关联的数据
+     * 同时进行多种缓存操作
+     * 存储同一类型的数据，可以存储为一个分区 ， 当更新时，可以将分区有关这一类型的数据全部删除
+     *
+     * @param category
+     */
     @Override
     @Transactional
+//    @CacheEvict(value = {"category"}, key = "'Level1Categories'")
+//    @Caching(evict = {
+//            @CacheEvict(value = {"category"}, key = "'catalog'"),
+//            @CacheEvict(value = {"category"}, key = "'Level1Categories'")
+//    })
+    @CacheEvict(value = "category", allEntries = true) // 删除指定分区下的所有数据
     public void updateCascat(CategoryEntity category) {
         this.updateById(category);
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
     }
 
     @Override
+    //每一个缓存的数据都需要指定放在那个名字的缓存【缓存的分区，按照业务类型来分】
+    @Cacheable(value = {"category"}, key = "'Level1Categories'")
+    //当前结果的返回值需要缓存 ， 如果缓存中有 ， 那么直接返回缓存中的数据，如果缓存中没有，调用方法，将方法的结果放入缓存
     public List<CategoryEntity> findLevel1Categories() {
         LambdaQueryWrapper<CategoryEntity> lqw = new LambdaQueryWrapper<>();
         lqw.eq(CategoryEntity::getParentCid, 0);
         List<CategoryEntity> categoryEntities = this.list(lqw);
         return categoryEntities;
-
+//        return null;
     }
 
     /**
@@ -121,28 +145,62 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      *
      * @return
      */
+//    @Override
+//    public Map<String, List<Catelog2Vo>> getCatalogJSON() {
+//        //给redis中放入json字符串，拿出的json字符串 ， 还是逆转为能用的对象类型【序列化与反序列化】
+//        //1. 加入缓存逻辑， 环村中存放的是json字符串 ， 便于跨平台跨语言使用
+//        String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
+//        if (StringUtils.isEmpty(catalogJSON)) {
+//            log.error("缓存不命中，查询数据库");
+//            //2. 缓存中没有，查询数据库
+//            Map<String, List<Catelog2Vo>> catalogJSONFromDB = getDataFromdb();
+//
+//            return catalogJSONFromDB;
+//        }
+//        log.error("缓存命中，不查询数据库");
+//        //转为指定的对象
+//        Map<String, List<Catelog2Vo>> result = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catelog2Vo>>>() {
+//        });
+//        return result;
+//
+//    }
     @Override
+    @Cacheable(value = {"category"}, key = "'catalog'")
     public Map<String, List<Catelog2Vo>> getCatalogJSON() {
-        //给redis中放入json字符串，拿出的json字符串 ， 还是逆转为能用的对象类型【序列化与反序列化】
-        //1. 加入缓存逻辑， 环村中存放的是json字符串 ， 便于跨平台跨语言使用
-        String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
-        if (StringUtils.isEmpty(catalogJSON)) {
-            log.error("缓存不命中，查询数据库");
-            //2. 缓存中没有，查询数据库
-            Map<String, List<Catelog2Vo>> catalogJSONFromDB = getCatalogJSONFromDBWithRedisLock();
+        Map<String, List<Catelog2Vo>> dataFromDBRedisson = getDataFromDBRedisson();
+        return dataFromDBRedisson;
+    }
 
-            return catalogJSONFromDB;
+    /**
+     * 缓存里的数据如何和数据库保持一致 ， 缓存一致性问题
+     * 解决： 双写模式  失效模式（选择）
+     * 缓存+过期时间可以解决大部分业务的缓存一致性问题 ， 可以加一个读写锁（选择）
+     * 缓存里面放读多写少的数据，一致性和即时性要求低的数据
+     * <p>
+     * 我们的解决方案：
+     * 缓存的所有数据都有过期时间，数据过期下一次查询更新触发主动更新
+     * 读写数据的时候，加上分布式读写锁
+     *
+     * @return
+     */
+    public Map<String, List<Catelog2Vo>> getDataFromDBRedisson() {
+        //注意锁的名字 ， 锁的力度，越细越快
+        RLock lock = redisson.getLock("catalogJson-lock");
+        lock.lock();
+        log.debug("获取分布式锁成功");
+        Map<String, List<Catelog2Vo>> dataFromDB = null;
+        try {
+            dataFromDB = getDataFromdb();
+        } finally {
+            lock.unlock();
         }
-        log.error("缓存命中，不查询数据库");
-        //转为指定的对象
-        Map<String, List<Catelog2Vo>> result = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catelog2Vo>>>() {
-        });
-        return result;
 
+        return dataFromDB;
     }
 
     /**
      * 简单的分布式锁
+     *
      * @return
      */
     public Map<String, List<Catelog2Vo>> getCatalogJSONFromDBWithRedisLock() {
@@ -182,6 +240,44 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             dataFromDB = getDataFromDB();
         }
         return dataFromDB;
+    }
+
+    //    @Cacheable(value = "category", key = "#root.methodName")
+    public Map<String, List<Catelog2Vo>> getDataFromdb() {
+
+        List<CategoryEntity> selectList = this.baseMapper.selectList(null);
+        //-------优化---------------------
+
+        //查出所有一级分类
+        List<CategoryEntity> level1Categories = getParentCid(selectList, 0L);
+        //封装数据
+        Map<String, List<Catelog2Vo>> parant_cid = level1Categories.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
+            //每一个的一级分类 ， 查到这个以及分类的二级分类
+            LambdaQueryWrapper<CategoryEntity> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(CategoryEntity::getParentCid, v.getCatId());
+            //当前一级id的二级分类
+            List<CategoryEntity> categoryEntities = getParentCid(selectList, v.getCatId());
+
+            List<Catelog2Vo> catelog2Vos = null;
+            if (categoryEntities != null) {
+                catelog2Vos = categoryEntities.stream().map(l2 -> {
+
+                    Catelog2Vo catelog2Vo = new Catelog2Vo(v.getCatId().toString(), null, l2.getCatId().toString(), l2.getName());
+                    //赵二级分类的三级分类
+                    List<CategoryEntity> level3Cates = getParentCid(selectList, l2.getCatId());
+                    if (level3Cates != null) {
+                        List<Catelog2Vo.Catalog3Vo> catalog3Vos = level3Cates.stream().map(l3 -> {
+                            Catelog2Vo.Catalog3Vo catalog3Vo = new Catelog2Vo.Catalog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName());
+                            return catalog3Vo;
+                        }).collect(Collectors.toList());
+                        catelog2Vo.setCatalog3List(catalog3Vos);
+                    }
+                    return catelog2Vo;
+                }).collect(Collectors.toList());
+            }
+            return catelog2Vos;
+        }));
+        return parant_cid;
     }
 
     public Map<String, List<Catelog2Vo>> getDataFromDB() {
