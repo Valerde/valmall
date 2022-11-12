@@ -3,13 +3,18 @@ package com.sovava.search.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.sovava.common.to.es.SpuEsModel;
+import com.sovava.common.utils.R;
 import com.sovava.search.config.GulimallElasticSearchConfig;
 import com.sovava.search.constant.EsConstant;
+import com.sovava.search.feign.ProductFeignService;
 import com.sovava.search.service.MallSearchService;
+import com.sovava.search.vo.AttrRespVO;
+import com.sovava.search.vo.BrandEntity;
 import com.sovava.search.vo.SearchParam;
 import com.sovava.search.vo.SearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
+import org.bouncycastle.util.encoders.UTF8;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -34,8 +39,12 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -43,6 +52,9 @@ import java.util.List;
 public class MallSearchServiceImpl implements MallSearchService {
     @Resource
     private RestHighLevelClient client;
+
+    @Resource
+    private ProductFeignService productFeignService;
 
     @Override
     public SearchResult search(SearchParam searchParam) {
@@ -164,6 +176,7 @@ public class MallSearchServiceImpl implements MallSearchService {
             }
             attrVo.setAttrValue(attrValue);
 
+
             attrVos.add(attrVo);
         }
         searchResult.setAttrs(attrVos);
@@ -174,7 +187,81 @@ public class MallSearchServiceImpl implements MallSearchService {
         searchResult.setTotalPages((int) (page == 0 ? hits.getTotalHits().value / EsConstant.PRODUCT_PAGESIZE : (hits.getTotalHits().value / EsConstant.PRODUCT_PAGESIZE + 1)));
         searchResult.setPageNum(param.getPageNum());
 
+        List<Integer> pageNavs = new ArrayList<>();
+        for (int i = 1; i <= searchResult.getTotalPages(); i++) {
+            pageNavs.add(i);
+        }
+        searchResult.setPageNavs(pageNavs);
+
+        //构建面包屑导航功能
+        if (param.getAttrs() != null && param.getAttrs().size() != 0) {
+            List<SearchResult.NavVo> navVos = param.getAttrs().stream().map(attr -> {
+                SearchResult.NavVo navVo = new SearchResult.NavVo();
+                //分析每一个attrs传过来的参数值
+                String[] s = attr.split("_");
+                navVo.setNavValue(s[1]);
+                navVo.setNavName(s[0]);
+                R info = productFeignService.info(Long.parseLong(s[0]));
+                searchResult.getAttrIds().add(Long.parseLong(s[0]));
+                if (info.getCode() == 0) {
+                    AttrRespVO attrRespVO = info.getData("attr", new TypeReference<AttrRespVO>() {
+                    });
+                    navVo.setNavName(attrRespVO.getAttrName());
+                }
+
+                //取消了面包屑以后，我们要跳转的地方 ， 将请求地址的url里面的当前置空
+
+                String replace = replaceQueryString(param, attr, "attrs");
+                navVo.setLink("http://search.valmall.com/list.html?" + replace);
+
+                return navVo;
+            }).collect(Collectors.toList());
+            log.debug("面包屑信息{}", Arrays.toString(navVos.toArray()));
+            searchResult.setNavs(navVos);
+
+        }
+        //品牌面包屑 ， 分类面包屑
+        if (param.getBrandId() != null && param.getBrandId().size() != 0) {
+            List<SearchResult.NavVo> navs = searchResult.getNavs();
+            SearchResult.NavVo navVo = new SearchResult.NavVo();
+            navVo.setNavName("品牌");
+            //查询远程品牌信息
+            R infos = productFeignService.brandInfos(param.getBrandId());
+            if (infos.getCode() == 0) {
+                List<BrandEntity> brands = infos.getData("brand", new TypeReference<List<BrandEntity>>() {
+                });
+                StringBuffer buffer = new StringBuffer();
+                String replace = "";
+                for (BrandEntity brand : brands) {
+                    buffer.append(brand.getName()).append(":");
+                    replace = replaceQueryString(param, brand.getBrandId() + "", "brandId");
+                }
+                navVo.setNavValue(buffer.toString());
+                navVo.setLink("http://search.valmall.com/list.html?" + replace);
+            }
+
+            navs.add(navVo);
+            searchResult.setNavs(navs);
+        }
+        //分类
+
+
+
         return searchResult;
+    }
+
+    private static String replaceQueryString(SearchParam param, String value, String key) {
+        String encode;
+        try {
+            encode = URLEncoder.encode(value, "UTF-8");
+            encode = encode.replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+
+        String replace = "";
+        replace = param.get_queryString().replace("&" + key + "=" + encode, "");
+        return replace;
     }
 
     /**

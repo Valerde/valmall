@@ -5,6 +5,7 @@ import com.sovava.product.service.CategoryBrandRelationService;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -46,11 +47,17 @@ public class BrandServiceImpl extends ServiceImpl<BrandDao, BrandEntity> impleme
     @Transactional
     public void updateDetail(BrandEntity brand) {
         this.updateById(brand);
-        if (!StringUtils.isEmpty(brand.getName())){
-            categoryBrandRelationService.updateBrand(brand.getBrandId(),brand.getName());
+        if (!StringUtils.isEmpty(brand.getName())) {
+            categoryBrandRelationService.updateBrand(brand.getBrandId(), brand.getName());
 
             //TODO 更新其他关联
         }
+    }
+
+    @Override
+    public List<BrandEntity> getBrandsByIds(List<Long> brandIds) {
+        List<BrandEntity> brandEntities = this.listByIds(brandIds);
+        return brandEntities;
     }
 
 }

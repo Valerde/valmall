@@ -13,6 +13,7 @@ import com.sovava.product.vo.AttrRespVO;
 import com.sovava.product.vo.AttrVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -122,6 +123,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     }
 
     @Override
+    @Cacheable(value = "attr",key = "'attrinfo'+#root.args[0]")
     public AttrRespVO getAttrInfo(Long attrId) {
         AttrRespVO attrRespVO = new AttrRespVO();
         AttrEntity attrEntity = this.getById(attrId);

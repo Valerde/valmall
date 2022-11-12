@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.sovava.product.entity.BrandEntity;
 import com.sovava.product.entity.ProductAttrValueEntity;
+import com.sovava.product.service.BrandService;
 import com.sovava.product.service.ProductAttrValueService;
 import com.sovava.product.vo.AttrRespVO;
 import com.sovava.product.vo.AttrVo;
@@ -34,6 +36,8 @@ public class AttrController {
 
     @Resource
     private ProductAttrValueService productAttrValueService;
+    @Resource
+    private BrandService brandService;
 
 
     ///product/attr/base/listforspu/{spuId}
@@ -73,6 +77,13 @@ public class AttrController {
         return R.ok().put("attr", respVO);
     }
 
+    @RequestMapping("/infos/")
+    //@RequiresPermissions("product:attr:info")
+    public R infos(@RequestParam("brandIds") List<Long> brandIds) {
+        List<BrandEntity> brandEntities = brandService.getBrandsByIds(brandIds);
+        return R.ok().put("brand", brandEntities);
+    }
+
     /**
      * 保存
      */
@@ -99,7 +110,7 @@ public class AttrController {
     //@RequiresPermissions("product:attr:update")
     public R updateSpuAttr(@PathVariable("spuId") Long spuId
             , @RequestBody List<ProductAttrValueEntity> list) {
-        productAttrValueService.updateSpuAttr(spuId,list);
+        productAttrValueService.updateSpuAttr(spuId, list);
 
         return R.ok();
     }
@@ -117,7 +128,7 @@ public class AttrController {
     }
 
     @GetMapping("/hello")
-    public String simpleServer(){
+    public String simpleServer() {
         return "hello guy";
     }
 }
