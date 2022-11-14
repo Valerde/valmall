@@ -3,7 +3,7 @@
 
 <mapper namespace="com.sovava.product.dao.AttrGroupDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.sovava.product.entity.AttrGroupEntity" id="attrGroupMap">
         <result property="attrGroupId" column="attr_group_id"/>
         <result property="attrGroupName" column="attr_group_name"/>
@@ -12,6 +12,32 @@
         <result property="icon" column="icon"/>
         <result property="catelogId" column="catelog_id"/>
     </resultMap>
+    <!--只要有嵌套属性 ， 就要封装自定义结果-->
+    <resultMap id="spuItemAttrGroupVo" type="com.sovava.product.vo.SkuItemVo$SpuItemAttrGroupVo">
+        <result property="groupName" column="attr_group_name"></result>
+        <collection property="attrValues" ofType="com.sovava.product.vo.SkuItemVo$SpuBaseAttrVo">
+            <result property="attrName" column="attr_name"></result>
+            <result property="attrValue" column="attr_value"></result>
+        </collection>
+    </resultMap>
+
+    <select id="getAttrGroupWithAttrsBySpuId"
+            resultMap="spuItemAttrGroupVo">
+        SELECT pms_product_attr_value.`spu_id`,
+               ag.`attr_group_name`,
+               ag.`attr_group_id`,
+               pms_attr_attrgroup_relation.`attr_id`,
+               pms_attr.`attr_name`,
+               pms_product_attr_value.`attr_value`
+
+        FROM `pms_attr_group` as ag
+                 LEFT JOIN pms_attr_attrgroup_relation
+                           ON pms_attr_attrgroup_relation.`attr_group_id` = ag.`attr_group_id`
+                 LEFT JOIN `pms_attr` on pms_attr.`attr_id` = pms_attr_attrgroup_relation.`attr_id`
+                 LEFT JOIN `pms_product_attr_value` on pms_product_attr_value.`attr_id` = pms_attr.`attr_id`
+        where ag.catelog_id = #{catalogId}
+          and pms_product_attr_value.`spu_id` = #{spuId};
+    </select>
 
 
 </mapper>

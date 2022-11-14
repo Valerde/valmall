@@ -3,7 +3,10 @@ package com.sovava.product;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.product.entity.BrandEntity;
+import com.sovava.product.service.AttrGroupService;
 import com.sovava.product.service.BrandService;
+import com.sovava.product.vo.SkuItemVo;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 @SpringBootTest
+@Slf4j
 class GulimallProductApplicationTests {
 
     @Autowired
@@ -62,5 +66,20 @@ class GulimallProductApplicationTests {
     @Test
     public void testRedissonClient() {
         System.out.println(redissonClient);
+    }
+
+
+
+
+
+    @Autowired
+    private AttrGroupService attrGroupService;
+    @Test
+    public void testGetAttrGroupWithAttrsBySpuId(){
+        List<SkuItemVo.SpuItemAttrGroupVo> attrGroupWithAttrsBySpuId = attrGroupService.getAttrGroupWithAttrsBySpuId(7L, 225L);
+//        for (SkuItemVo.SpuItemAttrGroupVo spuItemAttrGroupVo : attrGroupWithAttrsBySpuId) {
+//            log.debug(spuItemAttrGroupVo);
+//        }
+        log.debug("{}",attrGroupWithAttrsBySpuId);
     }
 }

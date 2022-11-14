@@ -3,6 +3,7 @@ package com.sovava.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sovava.common.utils.PageUtils;
 import com.sovava.product.entity.SkuInfoEntity;
+import com.sovava.product.vo.SkuItemVo;
 
 import java.util.List;
 import java.util.Map;
@@ -21,5 +22,7 @@ public interface SkuInfoService extends IService<SkuInfoEntity> {
     PageUtils queryPageByCondition(Map<String, Object> params);
 
     List<SkuInfoEntity> selectSkuBySpuId(Long spuId);
+
+    SkuItemVo itemInfo(Long skuId);
 }
 

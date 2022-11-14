@@ -5,6 +5,7 @@ import com.sovava.common.utils.PageUtils;
 import com.sovava.product.entity.AttrGroupEntity;
 import com.sovava.product.vo.AttrGroupRelationVO;
 import com.sovava.product.vo.AttrGroupWithAttrsVo;
+import com.sovava.product.vo.SkuItemVo;
 
 import java.util.List;
 import java.util.Map;
@@ -34,5 +35,7 @@ public interface AttrGroupService extends IService<AttrGroupEntity> {
      * @return
      */
     List<AttrGroupWithAttrsVo> getAttrGroupWithAttrByCatlog(Long catelogId);
+
+    List<SkuItemVo.SpuItemAttrGroupVo> getAttrGroupWithAttrsBySpuId(Long spuId, Long catalogId);
 }
 

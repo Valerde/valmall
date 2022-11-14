@@ -7,6 +7,7 @@ import com.sovava.product.entity.AttrEntity;
 import com.sovava.product.service.AttrService;
 import com.sovava.product.vo.AttrGroupRelationVO;
 import com.sovava.product.vo.AttrGroupWithAttrsVo;
+import com.sovava.product.vo.SkuItemVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -113,6 +114,12 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
 
         return attrGroupWithAttrsVos;
 
+    }
+
+    @Override
+    public List<SkuItemVo.SpuItemAttrGroupVo> getAttrGroupWithAttrsBySpuId(Long spuId, Long catalogId) {
+        List<SkuItemVo.SpuItemAttrGroupVo> attrGroupVos =  this.baseMapper.getAttrGroupWithAttrsBySpuId(spuId,catalogId);
+        return attrGroupVos;
     }
 
 }
