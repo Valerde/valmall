@@ -1,7 +1,9 @@
 package com.sovava.product.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+//import com.alibaba.fastjson.JSON;
+//import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.product.service.CategoryBrandRelationService;
 import com.sovava.product.vo.Catelog2Vo;

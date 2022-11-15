@@ -1,6 +1,7 @@
 package com.sovava.product.service.impl;
 
-import com.alibaba.fastjson.TypeReference;
+//import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.common.constant.ProductConstant;
 import com.sovava.common.to.SkuReductionTo;
