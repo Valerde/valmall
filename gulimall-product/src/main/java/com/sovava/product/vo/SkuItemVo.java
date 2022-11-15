@@ -12,6 +12,8 @@ import java.util.List;
 public class SkuItemVo {
     //1. 获取sku的基本信息 pms_sku_info
     SkuInfoEntity info;
+    //有货无货
+    Boolean hasStock = true;
     //2. 获取sku的图片信息 pms_sku_images
     List<SkuImagesEntity> images;
     //3. 获取spu的所有销售属性
@@ -27,7 +29,7 @@ public class SkuItemVo {
     public static class SkuItemSaleAttrsVo {
         private Long attrId;
         private String attrName;
-        private List<String> attrValue;
+        private List<AttrValueWithSkuIdVo> attrValues;
     }
 
     @Data
@@ -42,5 +44,11 @@ public class SkuItemVo {
     public static class SpuBaseAttrVo {
         private String attrName;
         private String attrValue;
+    }
+
+    @Data
+    public static class AttrValueWithSkuIdVo{
+        private String attrValue;
+        private String skuIds;
     }
 }

@@ -3,8 +3,10 @@ package com.sovava.product;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.product.entity.BrandEntity;
+import com.sovava.product.entity.SkuSaleAttrValueEntity;
 import com.sovava.product.service.AttrGroupService;
 import com.sovava.product.service.BrandService;
+import com.sovava.product.service.SkuSaleAttrValueService;
 import com.sovava.product.vo.SkuItemVo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -81,5 +83,13 @@ class GulimallProductApplicationTests {
 //            log.debug(spuItemAttrGroupVo);
 //        }
         log.debug("{}",attrGroupWithAttrsBySpuId);
+    }
+
+    @Resource
+    private SkuSaleAttrValueService skuSaleAttrValueService;
+    @Test
+    public void testGetSaleAttrsBySpuId(){
+        List<SkuItemVo.SkuItemSaleAttrsVo> vos = skuSaleAttrValueService.getSaleAttrsBySpuId(7L);
+        System.out.println(vos);
     }
 }
