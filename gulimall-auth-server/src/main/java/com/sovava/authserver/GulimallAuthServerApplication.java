@@ -1,4 +1,4 @@
-package com.sovava.member;
+package com.sovava.authserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,12 +6,12 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@EnableFeignClients
 @EnableDiscoveryClient
-public class GulimallMemberApplication {
+@EnableFeignClients
+public class GulimallAuthServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(GulimallMemberApplication.class, args);
+        SpringApplication.run(GulimallAuthServerApplication.class, args);
     }
 
 }

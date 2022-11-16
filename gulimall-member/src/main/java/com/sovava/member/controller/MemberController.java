@@ -4,6 +4,11 @@ import java.util.Arrays;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.sovava.common.exception.BizCodeEnum;
+import com.sovava.member.exception.PhoneExistException;
+import com.sovava.member.exception.UsernameExistException;
+import com.sovava.member.vo.UserLoginVo;
+import com.sovava.member.vo.UserRegistVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +16,6 @@ import com.sovava.member.entity.MemberEntity;
 import com.sovava.member.service.MemberService;
 import com.sovava.common.utils.PageUtils;
 import com.sovava.common.utils.R;
-
 
 
 /**
@@ -28,11 +32,42 @@ public class MemberController {
     private MemberService memberService;
 
     /**
+     * 注册功能 ， 在验证码合法的情况下向数据库插入数据原， 需要检查是否非重复注册
+     *
+     * @param vo
+     * @return
+     */
+    @PostMapping("/regist")
+    public R register(@RequestBody UserRegistVo vo) {
+        try {
+            memberService.regist(vo);
+        } catch (UsernameExistException uex) {
+            return R.error(BizCodeEnum.USER_EXIST_EXCEPTION.getCode(), BizCodeEnum.USER_EXIST_EXCEPTION.getMessage());
+        } catch (PhoneExistException pex) {
+            return R.error(BizCodeEnum.PHONE_EXIST_EXCEPTION.getCode(), BizCodeEnum.PHONE_EXIST_EXCEPTION.getMessage());
+        }
+
+        return R.ok();
+    }
+
+    @PostMapping("/login")
+    public R login(@RequestBody UserLoginVo vo) {
+        MemberEntity memberEntity = memberService.login(vo);
+        if (memberEntity!=null){
+            //登陆成功
+            return R.ok();
+        }else {
+            //登陆失败
+            return R.error(BizCodeEnum.LOGINACCT_PASSWORD_INVALID_EXCEPTION.getCode(), BizCodeEnum.LOGINACCT_PASSWORD_INVALID_EXCEPTION.getMessage());
+        }
+    }
+
+    /**
      * 列表
      */
     @RequestMapping("/list")
     //@RequiresPermissions("member:member:list")
-    public R list(@RequestParam Map<String, Object> params){
+    public R list(@RequestParam Map<String, Object> params) {
         PageUtils page = memberService.queryPage(params);
 
         return R.ok().put("page", page);
@@ -44,8 +79,8 @@ public class MemberController {
      */
     @RequestMapping("/info/{id}")
     //@RequiresPermissions("member:member:info")
-    public R info(@PathVariable("id") Long id){
-		MemberEntity member = memberService.getById(id);
+    public R info(@PathVariable("id") Long id) {
+        MemberEntity member = memberService.getById(id);
 
         return R.ok().put("member", member);
     }
@@ -55,8 +90,8 @@ public class MemberController {
      */
     @RequestMapping("/save")
     //@RequiresPermissions("member:member:save")
-    public R save(@RequestBody MemberEntity member){
-		memberService.save(member);
+    public R save(@RequestBody MemberEntity member) {
+        memberService.save(member);
 
         return R.ok();
     }
@@ -66,8 +101,8 @@ public class MemberController {
      */
     @RequestMapping("/update")
     //@RequiresPermissions("member:member:update")
-    public R update(@RequestBody MemberEntity member){
-		memberService.updateById(member);
+    public R update(@RequestBody MemberEntity member) {
+        memberService.updateById(member);
 
         return R.ok();
     }
@@ -77,8 +112,8 @@ public class MemberController {
      */
     @RequestMapping("/delete")
     //@RequiresPermissions("member:member:delete")
-    public R delete(@RequestBody Long[] ids){
-		memberService.removeByIds(Arrays.asList(ids));
+    public R delete(@RequestBody Long[] ids) {
+        memberService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
     }

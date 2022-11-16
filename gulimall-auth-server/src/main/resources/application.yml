@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.37.129:8848
+  application:
+    name: gulimall-auth-server
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+  thymeleaf:
+    cache: false
+  redis:
+    host: 192.168.37.129
+    port: 6379
+server:
+  port: 8086
+logging:
+  level:
+    com.sovava: debug
