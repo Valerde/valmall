@@ -16,9 +16,9 @@ import lombok.Data;
  */
 @Data
 @TableName("oms_order_return_reason")
-public class OrderReturnReasonEntity implements Serializable {
+public class OrderReturnReasonEntity  {
 	private static final long serialVersionUID = 1L;
-
+//implements Serializable
 	/**
 	 * id
 	 */
