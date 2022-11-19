@@ -17,7 +17,7 @@ public class MyWebConfig implements WebMvcConfigurer {
          * post请求->发到registercontroller-》转发/重定向-》视图映射->默认get方式
          */
 
-        registry.addViewController("/loginPage").setViewName("login");
+//        registry.addViewController("/loginPage").setViewName("login");
         registry.addViewController("/reg").setViewName("reg");
 
     }

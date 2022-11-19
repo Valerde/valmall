@@ -7,6 +7,7 @@ import java.util.Map;
 import com.sovava.common.exception.BizCodeEnum;
 import com.sovava.member.exception.PhoneExistException;
 import com.sovava.member.exception.UsernameExistException;
+import com.sovava.member.vo.SocialUser;
 import com.sovava.member.vo.UserLoginVo;
 import com.sovava.member.vo.UserRegistVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,18 @@ public class MemberController {
     @Autowired
     private MemberService memberService;
 
+    @PostMapping("/oauth2/login")
+    public R socialLogin(@RequestBody SocialUser socialUser) {
+        MemberEntity memberEntity = memberService.login(socialUser);
+        if (memberEntity != null) {
+            //登陆成功
+            return R.ok().setData(memberEntity);
+        } else {
+            //登陆失败
+            return R.error(BizCodeEnum.LOGINACCT_PASSWORD_INVALID_EXCEPTION.getCode(), BizCodeEnum.LOGINACCT_PASSWORD_INVALID_EXCEPTION.getMessage());
+        }
+    }
+
     /**
      * 注册功能 ， 在验证码合法的情况下向数据库插入数据原， 需要检查是否非重复注册
      *
@@ -53,10 +66,10 @@ public class MemberController {
     @PostMapping("/login")
     public R login(@RequestBody UserLoginVo vo) {
         MemberEntity memberEntity = memberService.login(vo);
-        if (memberEntity!=null){
+        if (memberEntity != null) {
             //登陆成功
-            return R.ok();
-        }else {
+            return R.ok().setData(memberEntity);
+        } else {
             //登陆失败
             return R.error(BizCodeEnum.LOGINACCT_PASSWORD_INVALID_EXCEPTION.getCode(), BizCodeEnum.LOGINACCT_PASSWORD_INVALID_EXCEPTION.getMessage());
         }

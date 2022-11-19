@@ -8,6 +8,7 @@ import com.sovava.authserver.vo.UserRegistVo;
 import com.sovava.common.constant.AuthServerConstant;
 import com.sovava.common.exception.BizCodeEnum;
 import com.sovava.common.utils.R;
+import com.sovava.common.vo.MemberRespVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -124,11 +126,18 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(UserLoginVo vo, RedirectAttributes attributes) {
+    public String login(UserLoginVo vo, RedirectAttributes attributes, HttpSession session) {
         log.debug(vo.toString());
         R loginR = memberFeignService.login(vo);
         if (loginR.getCode() == 0) {
-            //登陆成功 TODO 登陆成功后的处理
+            //登陆成功 TO DO 登陆成功后的处理
+            MemberRespVo memberRespVo = loginR.getData(new TypeReference<MemberRespVo>() {
+            });
+            log.debug("账号登录的memberRespVo:{}",memberRespVo.toString());
+            //将成功的用户放到session中
+            session.setAttribute(AuthServerConstant.LOGIN_USER, memberRespVo);
+            Object attribute = session.getAttribute(AuthServerConstant.LOGIN_USER);
+            log.debug("账号登录的session为：{}",attribute.toString());
             return "redirect:http://valmall.com";
         } else {
             String msg = loginR.getData("msg", new TypeReference<String>() {
@@ -141,9 +150,17 @@ public class LoginController {
 
     }
 
-    @GetMapping({"login.html"})
-    public String loginPage() {
-        return "login";
+    @GetMapping({"/login.html", "/loginPage"})
+    public String loginPage(HttpSession session) {
+        Object attribute = session.getAttribute(AuthServerConstant.LOGIN_USER);
+        if (attribute == null) {
+            //没登录
+            return "login";
+        } else {
+            //登陆了
+            return "redirect:http://valmall.com";
+        }
+
     }
 
     @GetMapping({"indexreg.html"})

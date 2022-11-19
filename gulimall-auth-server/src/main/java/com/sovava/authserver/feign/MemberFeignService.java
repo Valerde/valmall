@@ -1,5 +1,6 @@
 package com.sovava.authserver.feign;
 
+import com.sovava.authserver.vo.SocialUser;
 import com.sovava.authserver.vo.UserLoginVo;
 import com.sovava.authserver.vo.UserRegistVo;
 import com.sovava.common.utils.R;
@@ -14,4 +15,7 @@ public interface MemberFeignService {
 
     @PostMapping("/member/member/login")
     R login(@RequestBody UserLoginVo vo);
+
+    @PostMapping("/member/member/oauth2/login")
+    R socialLogin(@RequestBody SocialUser socialUser);
 }

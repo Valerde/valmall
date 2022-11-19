@@ -1,12 +1,18 @@
 package com.sovava.member;
 
+import com.sovava.member.service.MemberService;
+import com.sovava.member.service.impl.MemberServiceImpl;
+import com.sovava.member.vo.SocialUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Slf4j
+@SpringBootTest
 public class OtherTest {
     @Test
     public void testMD5() {
@@ -22,5 +28,15 @@ public class OtherTest {
         log.debug(encode);
         boolean matches = encoder.matches("123456", "$2a$10$d4lh.CMeEh08yEkqsH6.g.JknD.nyDi2YTDvsiswOxBUFSE.3pHde");
         log.debug("{}",matches);
+    }
+
+    @Autowired
+    private MemberServiceImpl memberService;
+    @Test
+    public void testGetWeiBoSocialInfo(){
+        SocialUser socialUser = new SocialUser();
+        socialUser.setUid("7802249662");
+        socialUser.setAccess_token("2.00UY8BWIc5q12E4dbdd16fb9ImFORE");
+        memberService.querySocialUserInfo(socialUser);
     }
 }

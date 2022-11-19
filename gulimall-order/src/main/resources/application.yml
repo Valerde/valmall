@@ -27,6 +27,8 @@ spring:
         server-addr: 192.168.37.129:8848
   application:
     name: gulimall-product
+  thymeleaf:
+    cache: false
 mybatis-plus:
   global-config:
     db-config:

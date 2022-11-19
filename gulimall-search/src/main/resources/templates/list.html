@@ -63,12 +63,12 @@
             </div>
         </b>
         <ul>
-            <li>
-                <a href="/static/search/#" class="li_2">你好，请登录</a>
+            <li ><a href="http://auth.valmall.com/loginPage" th:if="${session.loginUser==null}"
+                                      class="aa">你好，请登录</a>
+                <a th:if="${session.loginUser!=null}" class="aa">你好，[[${session.loginUser.nickname}]]</a>
             </li>
-            <li>
-                <a href="/static/search/#">免费注册</a>
-            </li>
+
+            <li><a th:if="${session.loginUser==null}" href="http://auth.valmall.com/reg" style="color: red;">免费注册</a> |</li>
             <span>|</span>
             <li>
                 <a href="/static/search/#">我的订单</a>

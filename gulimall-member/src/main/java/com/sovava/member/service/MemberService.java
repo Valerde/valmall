@@ -5,6 +5,7 @@ import com.sovava.common.utils.PageUtils;
 import com.sovava.member.entity.MemberEntity;
 import com.sovava.member.exception.PhoneExistException;
 import com.sovava.member.exception.UsernameExistException;
+import com.sovava.member.vo.SocialUser;
 import com.sovava.member.vo.UserLoginVo;
 import com.sovava.member.vo.UserRegistVo;
 
@@ -28,5 +29,7 @@ public interface MemberService extends IService<MemberEntity> {
     void checkPhoneUnique(String phone) throws PhoneExistException;
 
     MemberEntity login(UserLoginVo vo);
+
+    MemberEntity login(SocialUser socialUser);
 }
 

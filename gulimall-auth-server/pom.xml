@@ -17,6 +17,11 @@
     </properties>
 
     <dependencies>
+        <!--整合spring session-->
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.sovava</groupId>
