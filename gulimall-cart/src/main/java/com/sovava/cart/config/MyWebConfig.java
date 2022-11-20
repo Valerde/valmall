@@ -1,6 +1,8 @@
 package com.sovava.cart.config;
 
+import com.sovava.cart.interceptor.CartInterceptor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -23,5 +25,12 @@ public class MyWebConfig implements WebMvcConfigurer {
         registry.addViewController("/successPage").setViewName("success");
         registry.addViewController("/successOldPage").setViewName("successOld");
 
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+
+        CartInterceptor cartInterceptor = new CartInterceptor();
+        registry.addInterceptor(cartInterceptor).addPathPatterns("/**");
     }
 }
