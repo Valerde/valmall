@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.common.utils.R;
 import com.sovava.ware.feign.ProductFeignService;
 import com.sovava.ware.vo.SkuHasStockVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import javax.annotation.Resource;
 
 
 @Service("wareSkuService")
+@Slf4j
 public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> implements WareSkuService {
 
     @Resource
@@ -111,10 +113,12 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             //查询当前sku总库存量
             Long stockNum = this.baseMapper.getSkuIdStock(item);
             if (stockNum == null) {
+                log.debug("getSkusHasStockBySkuIds方法体：stockNum == null");
                 stockNum = 0L;
             }
             vo.setSkuId(item);
             vo.setHasStock(stockNum > 0);
+            log.debug("getSkusHasStockBySkuIds方法体：{}",vo.getHasStock());
             return vo;
 
         }).collect(Collectors.toList());

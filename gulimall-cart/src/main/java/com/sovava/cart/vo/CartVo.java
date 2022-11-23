@@ -59,7 +59,9 @@ public class CartVo {
         //计算购物项总价
         if (this.items != null && this.items.size() != 0) {
             for (CartItemVo cartItem : this.items) {
-                totalAmount = totalAmount.add(cartItem.getTotalPrice());
+                if (cartItem.getCheck()) {
+                    totalAmount = totalAmount.add(cartItem.getTotalPrice());
+                }
             }
         }
         //减去总价

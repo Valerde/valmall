@@ -21,6 +21,12 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual
+  redis:
+    host: 192.168.37.129
+    port: 6379 # 配置使用redis作为缓存
+  session:
+    store-type: redis
+    timeout: 30m
   cloud:
     nacos:
       discovery:

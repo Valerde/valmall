@@ -65,6 +65,9 @@ public class WareSkuController {
     @RequestMapping("/save")
     //@RequiresPermissions("ware:waresku:save")
     public R save(@RequestBody WareSkuEntity wareSku) {
+        if (wareSku.getStockLocked() == null) {
+            wareSku.setStockLocked(0);
+        }
         wareSkuService.save(wareSku);
 
         return R.ok();

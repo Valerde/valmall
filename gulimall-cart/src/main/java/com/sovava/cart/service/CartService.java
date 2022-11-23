@@ -3,6 +3,8 @@ package com.sovava.cart.service;
 import com.sovava.cart.vo.CartItemVo;
 import com.sovava.cart.vo.CartVo;
 
+import java.util.List;
+
 public interface CartService {
     /**
      * 将商品添加或合并到购物车
@@ -33,4 +35,6 @@ public interface CartService {
     void updateChecked(Long skuId, Integer checked);
 
     void updateCount(Long skuId, Integer num);
+
+    List<CartItemVo> getUserCartItems(String toString);
 }
