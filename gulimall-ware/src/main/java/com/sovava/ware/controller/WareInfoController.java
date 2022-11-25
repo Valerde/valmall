@@ -34,7 +34,7 @@ public class WareInfoController {
      * @return
      */
     @GetMapping("/fare")
-    public R getFare(@RequestParam("addrId") Integer addrId) {
+    public R getFare(@RequestParam("addrId") Long addrId) {
         FareVo fare = wareInfoService.getFare(addrId);
         return R.ok().setData(fare);
     }

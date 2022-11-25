@@ -5,7 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.sovava.common.exception.BizCodeEnum;
+import com.sovava.ware.exception.NoStockException;
+import com.sovava.ware.vo.LockStockVo;
 import com.sovava.ware.vo.SkuHasStockVo;
+import com.sovava.ware.vo.WareSkuLockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +31,18 @@ import com.sovava.common.utils.R;
 public class WareSkuController {
     @Autowired
     private WareSkuService wareSkuService;
+
+    @PostMapping("/lock/order")
+    public R orderLock(@RequestBody WareSkuLockVo vo) {
+        try {
+            Boolean lock = wareSkuService.orderLock(vo);
+            return R.ok();
+        } catch (NoStockException e) {
+            return R.error(BizCodeEnum.NO_STOCK_EXCEPTION.getCode(), BizCodeEnum.NO_STOCK_EXCEPTION.getMessage());
+        }
+
+
+    }
 
     //查询sku是否有库存
     @PostMapping("/hasstock")

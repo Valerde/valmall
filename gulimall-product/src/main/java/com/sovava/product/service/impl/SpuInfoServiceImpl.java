@@ -1,6 +1,7 @@
 package com.sovava.product.service.impl;
 
 //import com.alibaba.fastjson.TypeReference;
+
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sovava.common.constant.ProductConstant;
@@ -326,6 +327,16 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
              * 3. 执行请求会有重试机制
              */
         }
+
+    }
+
+    @Override
+    public SpuInfoEntity getSpuInfoBySkuId(Long skuId) {
+
+        SkuInfoEntity skuInfo = skuInfoService.getById(skuId);
+        Long spuId = skuInfo.getSpuId();
+        SpuInfoEntity spuInfo = this.getById(spuId);
+        return spuInfo;
 
     }
 

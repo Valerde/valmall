@@ -63,8 +63,8 @@ public class WareInfoServiceImpl extends ServiceImpl<WareInfoDao, WareInfoEntity
     }
 
     @Override
-    public FareVo getFare(Integer addrId) {
-        R info = memberFeignService.info((long) addrId);
+    public FareVo getFare(Long addrId) {
+        R info = memberFeignService.info(addrId);
         MemberAddressVo memberAddressInfo = new MemberAddressVo();
         if (info.getCode() == 0) {
             log.debug("远程查询用户信息成功");

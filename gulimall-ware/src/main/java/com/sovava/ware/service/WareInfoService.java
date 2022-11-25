@@ -26,6 +26,6 @@ public interface WareInfoService extends IService<WareInfoEntity> {
      * @param addrId
      * @return
      */
-    FareVo getFare(Integer addrId);
+    FareVo getFare(Long addrId);
 }
 
