@@ -1,12 +1,15 @@
 package com.sovava.order.service.impl;
 
 import com.alibaba.fastjson2.TypeReference;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.sovava.common.constant.OrderConstant;
+import com.sovava.common.exception.NoStockException;
+import com.sovava.common.to.OrderTo;
 import com.sovava.common.utils.R;
 import com.sovava.common.vo.MemberRespVo;
-import com.sovava.order.dao.OrderItemDao;
 import com.sovava.order.entity.OrderItemEntity;
+import com.sovava.order.entity.PaymentInfoEntity;
 import com.sovava.order.enume.OrderStatusEnum;
 import com.sovava.order.feign.CartFeignService;
 import com.sovava.order.feign.MemberFeignService;
@@ -14,16 +17,19 @@ import com.sovava.order.feign.ProductFeignService;
 import com.sovava.order.feign.WareFeignService;
 import com.sovava.order.interceptor.LoginUserInterceptor;
 import com.sovava.order.service.OrderItemService;
+import com.sovava.order.service.PaymentInfoService;
 import com.sovava.order.to.OrderCreateTo;
 import com.sovava.order.vo.*;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -71,6 +77,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     private ProductFeignService productFeignService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private PaymentInfoService paymentInfoService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -144,9 +156,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return orderConfirmVo;
     }
 
+    /**
+     * 本地事务，在分布式系统中 ， 只能控制自己本地的回滚，不能控制远程回滚
+     * 需要用到分布式事务
+     *
+     * @param orderSubmitVo
+     * @return
+     */
     @Transactional
+//    @GlobalTransactional //高并发下表现不好 ， 使用消息队列
     @Override
     public SubmitOrderRespVo submitOrder(OrderSubmitVo orderSubmitVo) {
+//        Object o = AopContext.currentProxy();
         SubmitOrderRespVo respVo = new SubmitOrderRespVo();
         confirmVoThreadLocal.set(orderSubmitVo);
         MemberRespVo memberRespVo = LoginUserInterceptor.threadLocal.get();
@@ -194,14 +215,22 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     return orderItemVo;
                 }).collect(Collectors.toList());
                 wareSkuLockVo.setLocks(orderItemVos);
+                //远程锁库存
                 R lockR = wareFeignService.orderLock(wareSkuLockVo);
                 if (lockR.getCode() == 0) {
+                    //锁成功
                     respVo.setOrder(order.getOrder());
+//                    throw new NoStockException();
+//                    int i = 10 / 0;
+                    //TODO 订单创建成功 ， 发送消息给rabbitMQ
+                    rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", order.getOrder());
+                    //远程扣减积分
                     return respVo;
                 } else {
-                    respVo.setCode(3);
-                    log.debug("错误信息：库存锁定错误");
-                    return respVo;
+                    throw new NoStockException();
+//                    respVo.setCode(3);
+//                    log.debug("错误信息：库存锁定错误");
+//                    return respVo;
                 }
             } else {
                 log.debug("错误信息：验价错误");
@@ -210,6 +239,98 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             }
 
         }
+    }
+
+    @Override
+    public OrderEntity getOrderByOrderSn(String orderSn) {
+
+        LambdaQueryWrapper<OrderEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(OrderEntity::getOrderSn, orderSn);
+        OrderEntity one = this.getOne(lqw);
+        return one;
+    }
+
+
+    @Override
+    public void closeOrder(OrderEntity order) {
+        //
+        OrderEntity orderFromDb = this.getById(order.getId());
+        if (orderFromDb.getStatus() == OrderStatusEnum.CREATE_NEW.getCode()) {
+            OrderEntity orderToUpdate = new OrderEntity();
+            orderToUpdate.setId(order.getId());
+            orderToUpdate.setStatus(OrderStatusEnum.CANCLED.getCode());
+            this.updateById(orderToUpdate);
+            //向库存发送消息
+            OrderTo orderTo = new OrderTo();
+            BeanUtils.copyProperties(orderFromDb, orderTo);
+            log.debug("发送到MQ的订单信息TO为：{}", orderFromDb);
+            log.debug("发送到MQ的订单信息TO为：{}", orderTo);
+            rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderFromDb.getOrderSn());
+
+        }
+
+
+    }
+
+    @Override
+    public PayVo getpayVoByOrderSn(String orderSn) {
+        OrderEntity orderByOrderSn = getOrderByOrderSn(orderSn);
+
+        PayVo payVo = new PayVo();
+        payVo.setOut_trade_no(orderSn);//订单号
+        payVo.setBody(orderByOrderSn.getNote() + "备注");//订单的备注
+        payVo.setSubject("订单的主题");//订单的主题
+        payVo.setTotal_amount(orderByOrderSn.getTotalAmount().setScale(2, RoundingMode.UP).toString());//订单的总金额
+
+        return payVo;
+    }
+
+    /**
+     * 查询当前登录的用户的登录信息
+     *
+     * @param params
+     * @return
+     */
+    @Override
+    public PageUtils queryPageWithItem(Map<String, Object> params) {
+
+        MemberRespVo memberRespVo = LoginUserInterceptor.threadLocal.get();
+        LambdaQueryWrapper<OrderEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(OrderEntity::getMemberId, memberRespVo.getId());
+        IPage<OrderEntity> page = this.page(new Query<OrderEntity>().getPage(params), lqw);
+
+        List<OrderEntity> orderEntities = page.getRecords().stream().peek(item -> {
+            LambdaQueryWrapper<OrderItemEntity> lqw1 = new LambdaQueryWrapper<>();
+            lqw1.eq(OrderItemEntity::getOrderSn, item.getOrderSn());
+            List<OrderItemEntity> orderItemEntities = orderItemService.list(lqw1);
+            item.setOrderItemEntityList(orderItemEntities);
+        }).collect(Collectors.toList());
+
+        page.setRecords(orderEntities);
+        return new PageUtils(page);
+
+    }
+
+    @Override
+    public String handlePayResult(PayAsyncVo payAsyncVo) {
+        //保存交易流水
+        PaymentInfoEntity paymentInfoEntity = new PaymentInfoEntity();
+        paymentInfoEntity.setOrderSn(payAsyncVo.getOut_trade_no());
+        paymentInfoEntity.setTotalAmount(paymentInfoEntity.getTotalAmount());
+        paymentInfoEntity.setAlipayTradeNo(paymentInfoEntity.getAlipayTradeNo());
+        paymentInfoEntity.setSubject(paymentInfoEntity.getSubject());
+        paymentInfoEntity.setCreateTime(paymentInfoEntity.getCreateTime());
+        paymentInfoEntity.setCallbackTime(payAsyncVo.getNotify_time());
+
+        paymentInfoService.save(paymentInfoEntity);
+        //2 修改订单的信息
+        if (payAsyncVo.getTrade_status().equals("TRADE_SUCCESS") || payAsyncVo.getTrade_status().equals("TRADE_FINISH")) {
+            //支付成功状态
+            String outTradeNo = payAsyncVo.getOut_trade_no();
+            this.baseMapper.updateOrderStatus(outTradeNo, OrderStatusEnum.PAYED.getCode());
+        }
+
+        return "success";
     }
 
     private void saveOrder(OrderCreateTo order) {

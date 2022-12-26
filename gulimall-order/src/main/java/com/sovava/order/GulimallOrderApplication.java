@@ -17,6 +17,11 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
  *      1) RabbitListener 可以标在类上和方法上， 可以标注监听那个队列的消息
  *      2） RabbitHandler 标注在方法上时， 和RabbitListener配合使用可以处理同一个队列的不同类（相当于函数重载）
  *
+ *
+ * seata来控制分布式事务
+ * <br>1.每一个微服务创建undo_log表<br>
+ * 2.安装事务协调器seata_server：https://github.com/seata/seata/releases 已经在docker中部署
+ *
  */
 @SpringBootApplication
 @EnableRabbit

@@ -68,9 +68,17 @@ public class MyRabbitConfig {
              */
             @Override
             public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-//                log.debug("confirm correlationData:{}",correlationData);
-//                log.debug("消息是否成功收到：{}",ack);
-//                log.debug("失败的原因：{}",cause);
+                log.debug("rabbit服务器收到消息了");
+                log.debug("confirm correlationData:{}",correlationData);
+                log.debug("消息是否成功收到：{}",ack);
+                log.debug("失败的原因：{}",cause);
+
+                /**
+                 * 做好消息确认机制（publisher，consumer手动ACk机制）<br>
+                 * 每一个消费的消息都在数据库做好记录，定期将是白的消息再次发送<br>
+                 *
+                 *
+                 */
             }
         });
 

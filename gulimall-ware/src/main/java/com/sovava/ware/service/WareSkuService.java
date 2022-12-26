@@ -1,6 +1,8 @@
 package com.sovava.ware.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.sovava.common.to.OrderTo;
+import com.sovava.common.to.StockLockedTo;
 import com.sovava.common.utils.PageUtils;
 import com.sovava.ware.entity.WareSkuEntity;
 import com.sovava.ware.exception.NoStockException;
@@ -29,5 +31,9 @@ public interface WareSkuService extends IService<WareSkuEntity> {
     List<SkuHasStockVo> getSkusHasStockBySkuIds(List<Long> skuIds);
 
     Boolean orderLock(WareSkuLockVo vo) throws NoStockException;
+
+    void unlockStock(StockLockedTo stockLockedTo);
+
+    void unlockStock(String orderSn);
 }
 

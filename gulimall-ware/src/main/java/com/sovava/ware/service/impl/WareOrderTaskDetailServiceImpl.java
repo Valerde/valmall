@@ -1,7 +1,11 @@
 package com.sovava.ware.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,6 +28,16 @@ public class WareOrderTaskDetailServiceImpl extends ServiceImpl<WareOrderTaskDet
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public List<WareOrderTaskDetailEntity> listByTaskId(Long taskId) {
+
+        LambdaQueryWrapper<WareOrderTaskDetailEntity> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(WareOrderTaskDetailEntity::getTaskId, taskId);
+        lqw.eq(WareOrderTaskDetailEntity::getLockStatus, 1);
+        List<WareOrderTaskDetailEntity> list = this.list(lqw);
+        return list;
     }
 
 }

@@ -1,4 +1,4 @@
-package com.sovava.order.interceptor;
+package com.sovava.member.interceptor;
 
 import com.sovava.common.constant.AuthServerConstant;
 import com.sovava.common.vo.MemberRespVo;
@@ -19,9 +19,8 @@ public class LoginUserInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        boolean match = new AntPathMatcher().match("/order/order/status/**", request.getRequestURI());
-        boolean match1 = new AntPathMatcher().match("/payed/notify", request.getRequestURI());
-        if (match || match1) return true;
+        boolean match = new AntPathMatcher().match("/member/**", request.getRequestURI());
+        if (match) return true;
         MemberRespVo attribute = (MemberRespVo) request.getSession().getAttribute(AuthServerConstant.LOGIN_USER);
         if (attribute != null) {
             //记录此时的登录用户
@@ -33,6 +32,5 @@ public class LoginUserInterceptor implements HandlerInterceptor {
             log.debug("未登录去结算，重定向到登录页");
             return false;
         }
-
     }
 }

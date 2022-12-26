@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 商品库存
- * 
+ *
  * @author ykn
  * @email 602533622@qq.com
  * @date 2022-10-22 18:53:23
@@ -17,11 +17,13 @@ import java.util.List;
 @Mapper
 public interface WareSkuDao extends BaseMapper<WareSkuEntity> {
 
-    void addStock(@Param("skuId") Long skuId,@Param("wareId") Long wareId,@Param("skuNum") Integer skuNum);
+    void addStock(@Param("skuId") Long skuId, @Param("wareId") Long wareId, @Param("skuNum") Integer skuNum);
 
     Long getSkuIdStock(@Param("item") Long item);
 
     List<Long> listWareIdHasStock(@Param("skuId") Long skuId);
 
-    int lockSkuIdStock(@Param("num")int num,@Param("skuId") Long skuId,@Param("wareId") Long wareId);
+    int lockSkuIdStock(@Param("num") int num, @Param("skuId") Long skuId, @Param("wareId") Long wareId);
+
+    void unLock(@Param("skuId") Long skuId, @Param("wareId") Long wareId, @Param("num") Integer num);
 }

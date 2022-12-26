@@ -10,6 +10,14 @@ spring:
         server-addr: 192.168.37.129:8848
   application:
     name: gulimall-member
+  redis:
+    host: 192.168.37.129
+    port: 6379 # 配置使用redis作为缓存
+  session:
+    store-type: redis
+    timeout: 30m
+  thymeleaf:
+    cache: false
 mybatis-plus:
   global-config:
     db-config:
@@ -20,4 +28,3 @@ server:
 logging:
   level:
     com.sovava: debug
-

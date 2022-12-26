@@ -1,5 +1,6 @@
 package com.sovava.order;
 
+import com.sovava.order.config.AlipayTemplate;
 import com.sovava.order.entity.OrderEntity;
 import com.sovava.order.entity.OrderReturnReasonEntity;
 import lombok.extern.slf4j.Slf4j;
@@ -93,5 +94,12 @@ class GulimallOrderApplicationTests {
         log.debug("消息发送成功，{}", orderReturnReasonEntity.toString());
     }
 
+
+    @Autowired
+    private AlipayTemplate alipayTemplate;
+    @Test
+    public void testAliPay(){
+        System.out.println(alipayTemplate.getNotify_url());
+    }
 
 }

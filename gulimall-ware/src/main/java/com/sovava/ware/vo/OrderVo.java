@@ -1,15 +1,12 @@
-package com.sovava.order.entity;
+package com.sovava.ware.vo;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-
-import java.math.BigDecimal;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-
 import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 订单
@@ -19,14 +16,11 @@ import lombok.Data;
  * @date 2022-10-22 18:47:29
  */
 @Data
-@TableName("oms_order")
-public class OrderEntity implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class OrderVo implements Serializable {
 
     /**
      * id
      */
-    @TableId
     private Long id;
     /**
      * member_id
@@ -192,6 +186,5 @@ public class OrderEntity implements Serializable {
      * 修改时间
      */
     private Date modifyTime;
-    @TableField(exist = false)
-    private List<OrderItemEntity> orderItemEntityList;
+
 }

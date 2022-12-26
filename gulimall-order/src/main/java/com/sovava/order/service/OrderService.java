@@ -3,9 +3,7 @@ package com.sovava.order.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sovava.common.utils.PageUtils;
 import com.sovava.order.entity.OrderEntity;
-import com.sovava.order.vo.OrderConfirmVo;
-import com.sovava.order.vo.OrderSubmitVo;
-import com.sovava.order.vo.SubmitOrderRespVo;
+import com.sovava.order.vo.*;
 
 import java.util.Map;
 
@@ -23,5 +21,19 @@ public interface OrderService extends IService<OrderEntity> {
     OrderConfirmVo confirmOrder();
 
     SubmitOrderRespVo submitOrder(OrderSubmitVo orderSubmitVo);
+
+    OrderEntity getOrderByOrderSn(String orderSn);
+
+    /**
+     * 时间到达后关闭订单
+     * @param order
+     */
+    void closeOrder(OrderEntity order);
+
+    PayVo getpayVoByOrderSn(String orderSn);
+
+    PageUtils queryPageWithItem(Map<String, Object> params);
+
+    String handlePayResult(PayAsyncVo payAsyncVo);
 }
 

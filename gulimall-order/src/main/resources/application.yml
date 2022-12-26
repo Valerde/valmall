@@ -35,6 +35,9 @@ spring:
     name: gulimall-product
   thymeleaf:
     cache: false
+  mvc:
+    format:
+      date-time: yyyy-MM-dd HH:mm:ss
 mybatis-plus:
   global-config:
     db-config:

@@ -8,6 +8,23 @@ spring:
     name: gulimall-ware
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
+  rabbitmq:
+    addresses: 192.168.37.129
+    port: 5672
+    virtual-host: /sovava
+    username: sovava
+    password: ykn12345!
+    #开启发送端确认
+    publisher-confirm-type: correlated
+    #开启exchange到queue的确认
+    publisher-returns: true
+    #只要抵达队列 ， 以异步发送优先回调return confirm
+    template:
+      mandatory: true
+    #手动签收
+    listener:
+      simple:
+        acknowledge-mode: manual
 mybatis-plus:
   global-config:
     db-config:
