@@ -21,9 +21,7 @@ public class MyWebConfig implements WebMvcConfigurer {
          */
 
         registry.addViewController("/cartListPage").setViewName("cartList");
-        registry.addViewController("/cartListOldPage").setViewName("cartListOld");
         registry.addViewController("/successPage").setViewName("success");
-        registry.addViewController("/successOldPage").setViewName("successOld");
 
     }
 

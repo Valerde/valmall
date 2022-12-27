@@ -23,5 +23,6 @@
         <module>gulimall-search</module>
         <module>gulimall-cart</module>
         <module>gulimall-auth-server</module>
+        <module>gulimall-seckill</module>
     </modules>
 </project>
