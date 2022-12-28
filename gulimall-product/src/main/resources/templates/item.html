@@ -521,8 +521,14 @@
                             <span>￥</span>
                             <span th:text="${#numbers.formatDecimal(item.info.price,3,2)}">4499.00</span>
                         </li>
-                        <li>
-                            预约享资格
+                        <li style="color: red" th:if="${item.seckillInfo!=null}">
+                            <span th:if="${#dates.createNow().getTime()<item.seckillInfo.startTime} ">商品将会在[[${#dates.format(new java.util.Date(item.seckillInfo.startTime),"yyyy-MM-dd
+                            HH:mm:ss")}]]进行秒杀</span>
+
+                            <span th:if="${#dates.createNow().getTime()>=item.seckillInfo.startTime
+                                        && #dates.createNow().getTime()<= item.seckillInfo.endTime} ">
+                                秒杀价：[[${#numbers.formatDecimal(item.seckillInfo.seckillPrice,1,2)}]]
+                            </span>
                         </li>
                         <li>
                             <a href="/static/item/">
@@ -624,29 +630,6 @@
                             </dd>
                         </dl>
                     </div>
-                    <!--							<div class="box-attr-2 clear">-->
-                    <!--								<dl>-->
-                    <!--									<dt>选择版本</dt>-->
-                    <!--									<dd>-->
-                    <!--										<a href="/static/item/#">标准版</a>-->
-                    <!--									</dd>-->
-                    <!--									<dd>-->
-                    <!--										<a href="/static/item/#">套装版</a>-->
-                    <!--									</dd>-->
-                    <!--								</dl>-->
-                    <!--							</div>-->
-
-                    <!--							<div class="box-attr-2 clear">-->
-                    <!--								<dl>-->
-                    <!--									<dt>选择内存</dt>-->
-                    <!--									<dd>-->
-                    <!--										<a href="/static/item/#">64GB</a>-->
-                    <!--									</dd>-->
-                    <!--									<dd>-->
-                    <!--										<a href="/static/item/#">128GB</a>-->
-                    <!--									</dd>-->
-                    <!--								</dl>-->
-                    <!--							</div>-->
                 </div>
 
                 <div class="box-btns clear">
@@ -668,7 +651,15 @@
                         </div>
                     </div>
 
-                    <div class="box-btns-two">
+                    <div class="box-btns-two" th:if="${item.seckillInfo != null &&(#dates.createNow().getTime()>=item.seckillInfo.startTime
+                                        && #dates.createNow().getTime()<= item.seckillInfo.endTime)} ">
+                        <a id="secKillA" href="#"
+                           th:attr="skuId=${item.info.skuId},sessionId=${item.seckillInfo.promotionSessionId},code=${item.seckillInfo.randomCode}">
+                            立即抢购
+                        </a>
+                    </div>
+                    <div class="box-btns-two" th:if="${item.seckillInfo == null || (#dates.createNow().getTime()<item.seckillInfo.startTime
+                                        || #dates.createNow().getTime()> item.seckillInfo.endTime)} ">
                         <a class="addToCart" href="#" th:attr="skuId=${item.info.skuId}">
                             加入购物车
                         </a>
@@ -891,23 +882,23 @@
                     </li>
                     <li class="baozhuang actives">
                     <li class="baozhuang actives">
-<!--                        <div class="guiGebox">-->
-<!--                            <div class="guiGe" th:each="group : ${item.groupAttrs}">-->
-<!--                                <h3 th:text="${group.groupName}">主体</h3>-->
-<!--                                <dl>-->
-<!--                                    <div th:each="attr : ${group.attrs}">-->
-<!--                                        <dt th:text="${attr.attrName}">品牌</dt>-->
-<!--                                        <dd th:text="${attr.attrValue}">华为(HUAWEI)</dd>-->
-<!--                                    </div>-->
-<!--                                </dl>-->
-<!--                            </div>-->
-<!--                            <div class="package-list">-->
-<!--                                <h3>包装清单</h3>-->
-<!--                                <p>手机（含内置电池） X 1、5A大电流华为SuperCharge充电器X 1、5A USB数据线 X 1、半入耳式线控耳机-->
-<!--                                    X 1、快速指南X 1、三包凭证 X-->
-<!--                                    1、取卡针 X 1、保护壳 X 1</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <!--                        <div class="guiGebox">-->
+                        <!--                            <div class="guiGe" th:each="group : ${item.groupAttrs}">-->
+                        <!--                                <h3 th:text="${group.groupName}">主体</h3>-->
+                        <!--                                <dl>-->
+                        <!--                                    <div th:each="attr : ${group.attrs}">-->
+                        <!--                                        <dt th:text="${attr.attrName}">品牌</dt>-->
+                        <!--                                        <dd th:text="${attr.attrValue}">华为(HUAWEI)</dd>-->
+                        <!--                                    </div>-->
+                        <!--                                </dl>-->
+                        <!--                            </div>-->
+                        <!--                            <div class="package-list">-->
+                        <!--                                <h3>包装清单</h3>-->
+                        <!--                                <p>手机（含内置电池） X 1、5A大电流华为SuperCharge充电器X 1、5A USB数据线 X 1、半入耳式线控耳机-->
+                        <!--                                    X 1、快速指南X 1、三包凭证 X-->
+                        <!--                                    1、取卡针 X 1、保护壳 X 1</p>-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
                     </li>
                     <!--包装-->
                     <li class="baozhang actives" id="li3">
@@ -1319,18 +1310,18 @@
         return false;
     });
     //
-    // $(".seckill").click(function () {
-    //     var isLogin = [[${session.loginUser != null}]];     //true
-    //     if (isLogin) {
-    //         var killId = $(this).attr("sessionid") + "-" + $(this).attr("skuid");
-    //         var code = $(this).attr("code");
-    //         var num = $("#productNum").val();
-    //         location.href = "http://seckill.gulimall.com/kill?killId=" + killId + "&key=" + code + "&num=" + num;
-    //     } else {
-    //         alert("秒杀请先登录");
-    //     }
-    //     return false;
-    // });
+    $("#secKillA").click(function () {
+        var isLogin = [[${session.loginUser != null}]];     //true
+        if (isLogin) {
+            var killId = $(this).attr("sessionid") + "_" + $(this).attr("skuid");
+            var code = $(this).attr("code");
+            var num = $("#productNum").val();
+            location.href = "http://seckill.valmall.com/kill?killId=" + killId + "&key=" + code + "&num=" + num;
+        } else {
+            alert("秒杀请先登录");
+        }
+        return false;
+    });
 
 </script>
 

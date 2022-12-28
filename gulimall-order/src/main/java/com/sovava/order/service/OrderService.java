@@ -1,6 +1,7 @@
 package com.sovava.order.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.sovava.common.to.SecKillOrderTo;
 import com.sovava.common.utils.PageUtils;
 import com.sovava.order.entity.OrderEntity;
 import com.sovava.order.vo.*;
@@ -35,5 +36,7 @@ public interface OrderService extends IService<OrderEntity> {
     PageUtils queryPageWithItem(Map<String, Object> params);
 
     String handlePayResult(PayAsyncVo payAsyncVo);
+
+    void createSecKillOrder(SecKillOrderTo secKillOrder);
 }
 

@@ -76,3 +76,7 @@ spring:
           uri: lb://gulimall-member
           predicates:
             - Host=member.valmall.com
+        - id: gulimall_seckill_route
+          uri: lb://gulimall-seckill
+          predicates:
+            - Host=seckill.valmall.com

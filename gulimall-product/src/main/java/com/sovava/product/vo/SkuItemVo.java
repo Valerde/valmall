@@ -23,6 +23,8 @@ public class SkuItemVo {
 
     //5. 获取spu规格参数信息
     List<SpuItemAttrGroupVo> groupAttrs;
+    //当前商品的秒杀信息
+    SeckKillSkuRedisVo seckillInfo;
 
     @Data
     @ToString

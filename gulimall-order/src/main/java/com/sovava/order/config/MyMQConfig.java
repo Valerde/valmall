@@ -42,6 +42,12 @@ public class MyMQConfig {
     }
 
     @Bean
+    public Queue orderSecKillQueue() {
+        Queue orderSecKillQueue = new Queue("order.seckill.order.queue", true, false, false);
+        return orderSecKillQueue;
+    }
+
+    @Bean
     public Exchange orderEventExchange() {
 
         TopicExchange topicExchange = new TopicExchange("order-event-exchange", true, false);
@@ -64,11 +70,18 @@ public class MyMQConfig {
 
     /**
      * 订单释放和库存释放直接进行绑定
+     *
      * @return
      */
     @Bean
     public Binding orderReleaseOtherBinding() {
         Binding binding = new Binding("stock.release.stock.queue", Binding.DestinationType.QUEUE, "order-event-exchange", "order.release.other.#", null);
+        return binding;
+    }
+
+    @Bean
+    public Binding orderSecKillBinding() {
+        Binding binding = new Binding("order.seckill.order.queue", Binding.DestinationType.QUEUE, "order-event-exchange", "order.seckill.order", null);
         return binding;
     }
 }

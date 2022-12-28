@@ -95,12 +95,13 @@
             </b>
             <ul>
                 <li>
-                    <a  th:if="${session.loginUser!=null}">欢迎:[[${session.loginUser==null?'':session.loginUser.nickname}]]</a>
+                    <a th:if="${session.loginUser!=null}">欢迎:[[${session.loginUser==null?'':session.loginUser.nickname}]]</a>
                     <a href="http://auth.valmall.com/loginPage" th:if="${session.loginUser==null}"> 你好，请登录</a>
                 </li>
 
                 <li>
-                    <a href="http://auth.valmall.com/reg.html" th:if="${session.loginUser==null}" class="li_2">免费注册</a>
+                    <a href="http://auth.valmall.com/reg.html" th:if="${session.loginUser==null}"
+                       class="li_2">免费注册</a>
                 </li>
                 <span>|</span>
                 <li>
@@ -117,7 +118,7 @@
             <input id="searchText" type="text" placeholder=""/>
             <span style="background: url('/static/index/img/img_12.png') 0 -1px;"></span>
             <!--<button><i class="glyphicon"></i></button>-->
-            <a href="javascript:search();"><img src="/static/index/img/img_09.png" /></a>
+            <a href="javascript:search();"><img src="/static/index/img/img_09.png"/></a>
         </div>
         <div class="header_ico">
             <div class="header_gw">
@@ -200,12 +201,13 @@
     </div>
     <!--轮播主体内容-->
     <div class="header_main">
-<!--        <div th:text="${categories}"></div>-->
+        <!--        <div th:text="${categories}"></div>-->
         <div class="header_banner">
             <div class="header_main_left">
                 <ul>
                     <li th:each="category:${categories}">
-                        <a href="/static/#" class="header_main_left_a" th:attr="ctg-data=${category.catId}"><b th:text="${category.name}">家用电器111</b></a>
+                        <a href="/static/#" class="header_main_left_a" th:attr="ctg-data=${category.catId}"><b
+                                th:text="${category.name}">家用电器111</b></a>
                     </li>
 
                 </ul>
@@ -524,33 +526,9 @@
         <div class="swiper-container swiper_section_second_list_left">
             <div class="swiper-wrapper">
                 <div class="swiper-slide">
-                    <ul>
-                        <li>
-                            <img src="/static/index/img/section_second_list_img1.jpg" alt="">
-                            <p>花王 (Merries) 妙而舒 纸尿裤 大号 L54片 尿不湿（9-14千克） （日本官方直采） 花王 (Merries)
-                                妙而舒 纸尿裤 大号 L54片 尿不湿（9-14千</p>
-                            <span>¥83.9</span><s>¥99.9</s>
-                        </li>
-                        <li>
-                            <img src="/static/index/img/section_second_list_img2.jpg" alt="">
-                            <p>华为mate9 4GB+32GB版 月光银 移动联通电信4G手机 双卡</p>
-                            <span>¥17.90</span><s>¥29.90</s>
-                        </li>
-                        <li>
-                            <img src="/static/index/img/section_second_list_img3.jpg" alt="">
-                            <p>超能 植翠低泡洗衣液（鲜艳亮丽）2kg/袋装（新老包装随机</p>
-                            <span>¥20.70</span><s>¥44.90</s>
-                        </li>
-                        <li>
-                            <img src="/static/index/img/section_second_list_img4.jpg" alt="">
-                            <p>长城（GreatWall）红酒 特选5年橡木桶解百纳干红葡萄酒 整</p>
-                            <span>¥399.00</span><s>¥599.00</s>
-                        </li>
-                        <li>
-                            <img src="/static/index/img/section_second_list_img5.jpg" alt="">
-                            <p>惠普(HP)暗影精灵2代Pro 15.6英寸游戏笔记本电脑(i5-7300H</p>
-                            <span>¥5999.00</span><s>¥6499.00</s>
-                        </li>
+                    <ul id="seckillSkuContent">
+
+
                     </ul>
                 </div>
                 <div class="swiper-slide">
@@ -617,6 +595,36 @@
         var keyword = $("#searchText").val()
         window.location.href = "http://search.valmall.com/list.html?keyword=" + keyword;
     }
+
+    function to_href(skuId) {
+        var new_href = "http://item.valmall.com/" + skuId + ".html";
+        location.href = new_href;
+    }
+
+    $.get("http://seckill.valmall.com/currentSeckillSkus", function (resp) {
+        console.log(resp);
+        if (resp.data.length > 0) {
+            resp.data.forEach(function (item) {
+                console.log(item);
+
+                $("<li onclick='to_href(" + item.skuId + ")'></li>")
+                    .append($("<img style='height: 130px;width: 130px' src='" + item.skuInfo.skuDefaultImg + "'/>"))
+                    .append($("<p>" + item.skuInfo.skuTitle + "</p>"))
+                    .append($("<span>" + item.seckillPrice + "</span>"))
+                    .append($("<s>" + item.skuInfo.price + "</s>"))
+                    .appendTo("#seckillSkuContent");
+            });
+
+        }
+
+        // <li>
+        //     <img src="/static/index/img/section_second_list_img1.jpg" alt="">
+        //         <p>花王 (Merries) 妙而舒 纸尿裤 大号 L54片 尿不湿（9-14千克） （日本官方直采） 花王 (Merries)
+        //             妙而舒 纸尿裤 大号 L54片 尿不湿（9-14千</p>
+        //         <span>¥83.9</span><s>¥99.9</s>
+        // </li>
+
+    });
 
 </script>
 <script type="text/javascript" src="/static/index/js/text.js"></script>

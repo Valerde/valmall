@@ -1,9 +1,13 @@
 package com.sovava.product.service.impl;
 
+import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sovava.common.utils.R;
 import com.sovava.product.entity.SkuImagesEntity;
 import com.sovava.product.entity.SpuInfoDescEntity;
+import com.sovava.product.feign.SeckillFeignService;
 import com.sovava.product.service.*;
+import com.sovava.product.vo.SeckKillSkuRedisVo;
 import com.sovava.product.vo.SkuItemVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,6 +50,9 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 
     @Resource
     private ThreadPoolExecutor executor;
+
+    @Resource
+    private SeckillFeignService seckillFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -146,8 +153,21 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
             skuItemVo.setImages(images);
         }, executor);
 
+        CompletableFuture<Void> seckillFuture = CompletableFuture.runAsync(() -> {
+            //获取sku基本信息
+            R r = seckillFeignService.getskuSeckillInfo(skuId);
+            if (r.getCode() == 0) {
+                SeckKillSkuRedisVo killSkuRedisVo = r.getData(new TypeReference<SeckKillSkuRedisVo>() {
+                });
+
+                log.debug("秒杀信息为：{}", killSkuRedisVo.toString());
+                skuItemVo.setSeckillInfo(killSkuRedisVo);
+            }
+        }, executor);
+
+
         //等待所有线程执行完成
-        CompletableFuture<Void> all = CompletableFuture.allOf(infoFuture, saleAttrFuture, baseAttrFuture, spuDescFuture, imageFuture);
+        CompletableFuture<Void> all = CompletableFuture.allOf(infoFuture, saleAttrFuture, baseAttrFuture, spuDescFuture, imageFuture, seckillFuture);
         try {
             all.get();
         } catch (Exception e) {

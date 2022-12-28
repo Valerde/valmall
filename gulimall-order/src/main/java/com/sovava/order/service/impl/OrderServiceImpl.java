@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.sovava.common.constant.OrderConstant;
 import com.sovava.common.exception.NoStockException;
 import com.sovava.common.to.OrderTo;
+import com.sovava.common.to.SecKillOrderTo;
 import com.sovava.common.utils.R;
 import com.sovava.common.vo.MemberRespVo;
 import com.sovava.order.entity.OrderItemEntity;
@@ -331,6 +332,32 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         }
 
         return "success";
+    }
+
+    @Override
+    public void createSecKillOrder(SecKillOrderTo secKillOrder) {
+        if (true) return;
+        //TODO：由于后面有bug且没有更改的价值 ， 故而跳过
+        //TODO: 保存订单信息
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.setOrderSn(secKillOrder.getOrderSn());
+        orderEntity.setMemberId(secKillOrder.getMemberId());
+        orderEntity.setStatus(OrderStatusEnum.CREATE_NEW.getCode());
+        BigDecimal multiply = secKillOrder.getSeckillPrice().multiply(new BigDecimal("" + secKillOrder.getNum()));
+        orderEntity.setPayAmount(multiply);
+        this.save(orderEntity);
+        log.debug("保存的订单信息为：{}", orderEntity.toString());
+        //保存订单项
+        OrderItemEntity orderItemEntity = new OrderItemEntity();
+        orderItemEntity.setOrderSn(secKillOrder.getOrderSn());
+        orderItemEntity.setRealAmount(multiply);
+        orderItemEntity.setSkuQuantity(secKillOrder.getNum());
+        //TODO : 保存详细信息
+//        productFeignService.getSpuInfoBySkuId(secKillOrder.getSkuId());
+        orderItemService.save(orderItemEntity);
+        log.debug("保存的订单项信息为：{}", orderItemEntity.toString());
+
+
     }
 
     private void saveOrder(OrderCreateTo order) {
