@@ -1,4 +1,12 @@
 spring:
+  zipkin:
+    base-url: http://192.168.37.129:9411/
+    discovery-client-enabled: false
+    sender:
+      type: web
+  sleuth:
+    sampler:
+      probability: 1
 #  datasource:
 #    username: root
 #    password: ykn12345
@@ -8,6 +16,10 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.37.129:8848
+    sentinel:
+      transport:
+        dashboard: 192.168.2.249:8080
+        port: 8719
   application:
     name: gulimall-search
   jackson:
@@ -31,3 +43,8 @@ server:
 logging:
   level:
     com.sovava: debug
+    org.springframework.cloud.openfeign: debug
+    org.springframework.cloud.sleuth: debug
+feign:
+  sentinel:
+    enabled: true

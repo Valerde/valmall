@@ -1,5 +1,9 @@
 package com.sovava.deckill.service.impl;
 
+import com.alibaba.csp.sentinel.Entry;
+import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -69,7 +73,13 @@ public class SeckillServiceImpl implements SeckillService {
         }
     }
 
+    public List<SeckKillSkuRedisTo> secKillBlockHandler(BlockException ex) {
+        log.error("getCurrentSeckillSkus被限流了");
+        return null;
+    }
+
     @Override
+    @SentinelResource(value = "getCurrentSeckillSkus", blockHandler = "secKillBlockHandler")
     public List<SeckKillSkuRedisTo> getCurrentSeckillSkus() {
         //确定当前时间有哪个秒杀场次
         long time = new Date().getTime();
@@ -135,6 +145,12 @@ public class SeckillServiceImpl implements SeckillService {
     @Override
     public String kill(String killId, String key, Integer num) {
         MemberRespVo memberRespVo = LoginUserInterceptor.threadLocal.get();
+
+        try (Entry entry = SphU.entry("seckill-test")) {
+            int i = 0;
+        } catch (BlockException e) {
+            e.printStackTrace();
+        }
 
         //获取当前秒杀商品的详细信息
         BoundHashOperations<String, String, String> hashOps = redisTemplate.boundHashOps(SESSIONS_SKU_CHACH_PREFIX);

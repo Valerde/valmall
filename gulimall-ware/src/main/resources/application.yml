@@ -35,3 +35,6 @@ server:
 logging:
   level:
     com.sovava.ware: debug
+feign:
+  sentinel:
+    enabled: true

@@ -1,4 +1,12 @@
 spring:
+  zipkin:
+    base-url: http://192.168.37.129:9411/
+    discovery-client-enabled: false
+    sender:
+      type: web
+  sleuth:
+    sampler:
+      probability: 1
   cloud:
     gateway:
       routes:
@@ -80,3 +88,8 @@ spring:
           uri: lb://gulimall-seckill
           predicates:
             - Host=seckill.valmall.com
+
+
+feign:
+  sentinel:
+    enabled: true
